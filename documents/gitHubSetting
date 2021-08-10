@@ -1,0 +1,9 @@
+1. vsCode studio에 프로젝트 세팅 
+2. 터미널 접속 
+3.명령어 입력후 origin 세팅 확인
+
+PS C:\Users\all4land\Documents\nodeJs\NodeJS&FireBase> git remote add origin https://github.com/jyh5869/NodeJS-FireBase.git
+PS C:\Users\all4land\Documents\nodeJs\NodeJS&FireBase> git remote -v
+origin  https://github.com/jyh5869/NodeJS-FireBase.git (fetch)
+origin  https://github.com/jyh5869/NodeJS-FireBase.git (push) 
+PS C:\Users\all4land\Documents\nodeJs\NodeJS&FireBase> 

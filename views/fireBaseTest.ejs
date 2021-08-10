@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+  <head>
+  <meta charset="UTF-8">
+  <script src="https://www.gstatic.com/firebasejs/5.0.4/firebase.js"></script>
+  </head>
+  <h1>Firebase Test</h1>
+  <p>Firebase console에 데이터가 추가 되었는지 확인하세요</p>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyD_tg-m8Y77Q7K_w2lyY68igE4RWy-63DY",
+    authDomain: "nodejs-54f7b.firebaseapp.com",
+    databaseURL: "https://nodejs-54f7b-default-rtdb.firebaseio.com",
+    projectId: "nodejs-54f7b",
+    storageBucket: "nodejs-54f7b.appspot.com",
+    messagingSenderId: "647841088954",
+    appId: "1:647841088954:web:03a1abd6bf64a363d7c983",
+    measurementId: "G-4LBL09LTYG"
+    
+  };
+  firebase.initializeApp(config);
+   
+  var newPostKey = firebase.database().ref().child('posts').push().key;
+ 
+  var postData = {
+    brdno: newPostKey,
+    brdwriter:"홍길동",
+    brdtitle:"게시판 제목 오나122222222라",
+    brdmemo:"게시물 내용",
+    brddate: Date.now()
+  };
+ 
+  var updates = {};
+  updates['/board/' + newPostKey] = postData;
+ 
+ firebase.database().ref().update(updates);
+           
+</script>

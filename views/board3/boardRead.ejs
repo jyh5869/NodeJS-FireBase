@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>board sample for firebase (Firestore Database) Read</title>
+
+<%- include ("./common/include") %>
+
+</head>
+<body> 
+        <!--상단 컨테이너 시작-->
+        <%- include ("./common/header") %>
+        <!--상단 컨테이너 끝-->
+        <table border="1" style="width:600px">
+            <caption>board sample for firebase (Firestore Database) Read</caption>
+            <colgroup>
+                <col width='15%' />
+                <col width='*%' />
+            </colgroup>
+            <tbody>
+                <tr>
+                    <td>Writer</td>
+                    <td><%=row.brdwriter%></td>
+                </tr>
+                <tr>
+                    <td>Title</td>
+                    <td><%=row.brdtitle%></td>
+                </tr>
+                <tr>
+                    <td>Memo</td>
+                    <td><%=row.brdmemo%></td>
+                </tr>
+            </tbody>
+        </table>   
+        <a href="#" onclick="history.back(-1)">List</a>
+        
+        <%
+            if(row.brdwriter == userEmail){
+        %>
+            <!--
+            <a href="boardDelete?brdno=<%=row.brdno%>">Delete</a>
+            <a href="boardForm?brdno=<%=row.brdno%>">Modify</a>
+            -->
+            <a href="javascript:boardAction('boardDelete?brdno=<%=row.brdno%>','Delete');">Delete</a>
+            <a href="javascript:boardAction('boardForm?brdno=<%=row.brdno%>','Modify')">Modify</a>
+        <%
+            }
+        %>
+
+        
+
+       
+</body>
+</html>

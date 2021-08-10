@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>board sample for firebase (Realtime Database) Write</title>
+<!-- views/partials/head.ejs -->
+
+<script src="/public/javascripts/common.js"></script>
+
+<title>My Website</title>
+</head>
+<body> 
+    <form name="form1" action="boardSave" method="post">
+        <table border="1" style="width:600px">
+            <caption>board sample for firebase (Realtime Database) Write</caption>
+            <colgroup>
+                <col width='15%' />
+                <col width='*%' />
+            </colgroup>
+            <tbody>
+                <tr>
+                    <td>Writer</td>
+                    <td><input type="text" name="brdwriter" size="20" maxlength="20" value="<%=row.brdwriter%>"></td>
+                </tr>
+                <tr>
+                    <td>Title</td>
+                    <td><input type="text" name="brdtitle" size="70" maxlength="250" value="<%=row.brdtitle%>"></td>
+                </tr>
+                <tr>
+                    <td>Memo</td>
+                    <td><textarea name="brdmemo" rows="5" cols="60"><%=row.brdmemo%></textarea></td>
+                </tr>
+            </tbody>
+        </table>
+        <a href="#" onclick="form1.submit()">저장</a>
+        
+        <input type="hid-den" name="brdno" value="<%=row.brdno%>">
+        <input type="hid-den" name="brddate" value="<%=row.brddate%>">
+        
+    </form>  
+</body>
+</html>
