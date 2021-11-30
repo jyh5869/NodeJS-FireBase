@@ -3,6 +3,8 @@
     1. Repository를 clone 하여 IDE에 세팅
     2. 수정 -> 소스제어 -> 스테이징 -> 커밋 (코멘트 작성) -> 푸쉬 
 
+    *해당 경로의 모든 수정파일을 스테이징 하는 명령어 : it add .
+
 
 - Git 오류 -
     오류명 : fatal: Unable to create 'C:/Users/all4land/Desktop/NodeJS-FireBase/.git/index.lock': File exists.
