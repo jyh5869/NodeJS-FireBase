@@ -1,0 +1,11 @@
+    
+- Git 사용 법 -    
+    1. Repository를 clone 하여 IDE에 세팅
+    2. 수정 -> 소스제어 -> 스테이징 -> 커밋 (코멘트 작성) -> 푸쉬 
+
+
+- Git 오류 -
+    오류명 : fatal: Unable to create 'C:/Users/all4land/Desktop/NodeJS-FireBase/.git/index.lock': File exists.
+    원인   : 특정 Git 프로세스가 동작중일 때 다른 Git 프로세스가 실행되는 것을 막기 위해서 index.lock 이라는 파일이생긴다.
+    해결   : rm ./.git/index.lock -> index.lock 파일을 삭제하여 해결
+    
