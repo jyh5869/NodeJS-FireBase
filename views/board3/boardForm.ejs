@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>board sample for firebase (Firestore Database) Write</title>
+
+<%- include ("./common/include") %>
+
+</head>
+<body> 
+    <!--상단 컨테이너 시작-->
+    <%- include ("./common/header") %>
+    <!--상단 컨테이너 끝-->
+
+    <form name="form1" action="boardSave" method="post" enctype="multipart/form-data" >
+        <table border="1" style="width:600px">
+            <caption>board sample for firebase (Firestore Database) Write</caption>
+            <colgroup>
+                <col width='15%' />
+                <col width='*%' />
+            </colgroup>
+            <tbody>
+                <tr>
+                    <td>Writer</td>
+                    <td><input type="text" name="brdwriter" size="20" maxlength="20" value="<%=userEmail%>" readonly></td>
+                </tr>
+                <tr>
+                    <td>Title</td>
+                    <td><input type="text" name="brdtitle" size="70" maxlength="250" value="<%=row.brdtitle%>" ></td>
+                </tr>
+                <tr>
+                    <td>Memo</td>
+                    <td><textarea name="brdmemo" rows="5" cols="60"><%=row.brdmemo%></textarea></td>
+                </tr>
+                <tr>
+                    <td>File</td>
+                    <td><input type="file" name="attachFile" id="attachFile" ></td>
+                </tr>
+            </tbody>
+        </table>
+        <a href="#" onclick="fileCheck();">Save</a>
+        <a href="#" onclick="javascript:boardAction('boardDelete?brdno=<%=row.brdno%>','List');">List</a>
+        
+        <input type="hidden" name="brdno" value="<%=row.brdno%>">
+        <input type="hidden" name="brddate" value="<%=row.brddate%>">
+        
+    </form>
+    <script>    
+        function fileCheck() {
+				//input file 태그.
+				var file = document.getElementById('attachFile');
+				//파일 경로.
+				var filePath = file.value;
+				//전체경로를 \ 나눔.
+				var filePathSplit = filePath.split('\\'); 
+				//전체경로를 \로 나눈 길이.
+				var filePathLength = filePathSplit.length;
+				//마지막 경로를 .으로 나눔.
+				var fileNameSplit = filePathSplit[filePathLength-1].split('.');
+				//파일명 : .으로 나눈 앞부분
+				var fileName = fileNameSplit[0];
+				//파일 확장자 : .으로 나눈 뒷부분
+				var fileExt = fileNameSplit[1];
+				//파일 크기
+				var fileSize = file.files[0].size;
+
+
+               
+
+                form1.submit();
+			}
+
+    </script>  
+</body>
+</html>

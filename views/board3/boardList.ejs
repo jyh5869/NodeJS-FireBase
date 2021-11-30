@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>board sample for firebase (Firestore Database) List</title>
+
+<%- include ("./common/include") %>
+
+</head>
+<body> 
+    <!--상단 컨테이너 시작-->
+    <%- include ("./common/header") %>
+    <!--상단 컨테이너 끝-->
+
+    <div> - conection ID : <%=user.email%></div>
+    <br>
+    <div><a href="boardForm"> - Write - </a></div><br>
+
+    <table border="1" style="width:600px">
+        <caption>board sample for firebase (Firestore Database)</caption>
+        <colgroup>
+            <col width='8%' />
+            <col width='*%' />
+            <col width='15%' />
+            <col width='15%' />
+        </colgroup>
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Title</th>
+                <th>Writer</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        <%
+             for(var i=0; i<rows.length; i++) {
+        %>
+            <tr>
+                <td><%=rows.length-i%></td>
+                <td><a href='boardRead?brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a></td>
+                <td><%=rows[i].brdwriter%></td>
+                <td><%=rows[i].brddate%></td>
+            </tr>
+        <%
+             }
+        %>
+
+        <a href="boardList?type=first">First</a>&nbsp;&nbsp;
+        <a href="boardList?type=prev&currentPage=<%=currentPage%>">Prev(<%=currentPage%>)</a>&nbsp;&nbsp;
+        <a href="boardList?type=next&currentPage=<%=currentPage%>">Next(<%=currentPage%>)</a>&nbsp;&nbsp;
+        <a href="boardList?type=last">Last</a>&nbsp;&nbsp;
+
+        </tbody>
+    </table>   
+</body>
+</html>

@@ -1,0 +1,23 @@
+1. vsCode studio에 프로젝트 세팅 
+
+2. 터미널 접속 
+
+3.명령어 입력후 origin 세팅 확인
+
+    PS C:\Users\all4land\Documents\nodeJs\NodeJS&FireBase> git remote add origin https://github.com/jyh5869/NodeJS-FireBase.git
+    PS C:\Users\all4land\Documents\nodeJs\NodeJS&FireBase> git remote -v
+    origin  https://github.com/jyh5869/NodeJS-FireBase.git (fetch)
+    origin  https://github.com/jyh5869/NodeJS-FireBase.git (push) 
+    PS C:\Users\all4land\Documents\nodeJs\NodeJS&FireBase> 
+
+4.git push origin master 명령어 입력으로 github에 최종 PUSH 한다
+    PS C:\Users\all4land\Documents\nodeJs\NodeJS&FireBase> git push origin master
+    Enumerating objects: 47, done.
+    Counting objects: 100% (47/47), done.
+    Delta compression using up to 4 threads
+    Compressing objects: 100% (40/40), done.
+    Writing objects: 100% (47/47), 55.23 KiB | 1.17 MiB/s, done.
+    Total 47 (delta 10), reused 0 (delta 0), pack-reused 0
+    remote: Resolving deltas: 100% (10/10), done.
+    To https://github.com/jyh5869/NodeJS-FireBase.git
+    * [new branch]      master -> master
