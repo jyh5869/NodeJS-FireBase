@@ -28,6 +28,8 @@ app.use('/users', usersRouter);
 //app.use('/board1', require('./routes/board1'));
 //app.use('/board2', require('./routes/board2'));
 app.use('/board3', require('./routes/board3'));
+app.use('/socket', require('./routes/socket'));
+app.use('/common', require('./routes/common'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -50,7 +52,7 @@ app.use(function(err, req, res, next) {
   console.log( res.render('error'));
 });
 
-module.exports = app;
+
 
 /* 
  - firebase setting 확인
@@ -73,3 +75,78 @@ firebaseHosting에서는 firebaseHosting폴더 하위의 functions 폴더에서 
 1.firebase serve - http://localhost:5000/를 입력해서 그림가 같이 출력되면 firebase 호스팅을 위한 Node.js 프로젝트가 제대로 설정된 것이다.
 
 */
+
+
+
+/*
+  * 참고 URL1 = https://berkbach.com/node-js%EC%99%80-socket-io%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-%EC%B1%84%ED%8C%85-%EA%B5%AC%ED%98%84-1-cb215954847b
+  * 참고 URL2 = https://geundung.dev/61?category=719250
+*/
+/*
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+
+
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+*/
+/*
+app.get('/chatting', (req, res) => {
+  res.sendFile('socket/chatting2');
+
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('chat message', (msg) => {
+    io.emit('chat message', msg);
+  });
+  socket.on('disconnect', () => {
+  console.log('user disconnected');
+  });
+});
+*/
+
+/*
+
+io.on('connection', function(socket){
+    console.log("유저 접속 됨");
+
+    socket.on('send', function(data){
+        console.log("전달된 메시지"+data.msg);
+    });
+    
+    socket.on('disconnect', function(){
+        console.log("접속 종료"+data.msg);
+    })
+});
+
+
+
+
+http.listen(8080, () => {
+  console.log('Connected at 3000');
+});
+
+*/
+
+//make sure you keep this order
+
+
+//... 
+
+
+app.io = require('socket.io')();
+
+app.io.on('connection',(socket) => {
+  console.log('유저가 들어왔다');
+
+  socket.on('disconnect', () => {
+      console.log('유저 나갔다');
+  });
+
+  socket.on('chat-msg', (msg) => {
+    app.io.emit('chat-msg', msg);
+  });
+
+});
+
+module.exports = app;
