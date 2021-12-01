@@ -19,18 +19,15 @@ const admin = require('firebase-admin');
 var serviceAccount = require('./nodejs-54f7b-firebase-adminsdk-23c7m-1b5469b5f5.json');
 
 var friebaseAdmin = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  storageBucket: 'gs://nodejs-54f7b.appspot.com'
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: 'gs://nodejs-54f7b.appspot.com'
 });
 
 const bucket = friebaseAdmin.storage().bucket();
 /* 파일 업로드를 위한 multer, stream 세팅 e */
 
-router.get('/',function(req, res, next) {
-    res.redirect('boardList');
-});
 
-
+/* 파이어 베이스 접속 정보 */ 
 var config = {
     apiKey: "AIzaSyD_tg-m8Y77Q7K_w2lyY68igE4RWy-63DY",
     authDomain: "nodejs-54f7b.firebaseapp.com",
@@ -51,26 +48,30 @@ var db = firebase.firestore();
 
     ctrl shift p  - 명령 팔렛트
 */
+
+router.get('/',function(req, res, next) {
+    res.redirect('boardList');
+});
+
 router.get('/boardList', async function(req, res, currentPage) {
+    
+    //인증후 유저정보 세팅
     chkidentify(res, 'loginForm');
-
     var user = firebase.auth().currentUser;
-  
         
-        /* 첫번째 페이지  */
+    //게시물 갯수를 가져오기위환 세팅
+    const total  = db.collection('board').orderBy("brddate","desc").get()
+    const snapshot = await total;
 
-    const first  = db.collection('board').orderBy("brddate","desc").get()
-    const snapshot = await first
-
-
-    var pagingSize = 3;
-    var field     = "brddate";
+    //파라메터 세팅
+    var pagingSize  = 3;
+    var field       = "brddate";
     var type        = "";
-    var currentPage  = Number(req.query.currentPage);
+    var currentPage = Number(req.query.currentPage);
     var currentDoc  = 0;
-    var totalCount = snapshot.docs.length;
+    var totalCount  = snapshot.docs.length;
 
-        //마지막페이지, 이전페이지, 첫페이지, 다음페이지 파라메터
+    //type : 마지막페이지, 이전페이지, 첫페이지, 다음페이지 파라메터
     if(req.query.type == null){
         type = "first";
     }
@@ -78,33 +79,31 @@ router.get('/boardList', async function(req, res, currentPage) {
         type = req.query.type;
     }
 
-
     if(req.query.currentPage == null ){//첫 페이지, 마지막 페이지 이동시
         
         if(type == 'first'){
-            console.log('◎◎◎◎◎◎◎◎ 첫페이지로 이동');
-            currentDoc = totalCount;
-            currentPage = 1;
             
+            currentDoc  = totalCount;
+            currentPage = 1;
+            console.log('first ----------> 첫페이지로 이동');
         }
         else if(type == 'last'){
             
-            if(totalCount%pagingSize != 0 ){
-                console.log('◎◎◎◎◎◎◎◎'+totalCount%pagingSize);
-                //currentDoc = totalCount - (totalCount%pagingSize);
-                currentDoc = totalCount%pagingSize;
+            if(totalCount%pagingSize != 0 ){    
+                currentDoc  = totalCount%pagingSize;
                 currentPage = Math.ceil(totalCount/pagingSize);
+                console.log('last ----------> type1: '+totalCount%pagingSize);
             }
             else{
-                currentDoc = pagingSize;
-                currentPage = totalCount/pagingSize ;
-                console.log('●●●●●●●●●●●●●●'+totalCount%pagingSize);
-            }
-            
+                currentDoc  = pagingSize;
+                currentPage = totalCount/pagingSize;
+                console.log('last ----------> type2:'+totalCount%pagingSize);
+            } 
         }
     }
     else{//이전 페이지, 다음페이지 이동시
         var tempCurrentDoc ;
+
         if(type == 'next'){
             tempCurrentDoc = Number(totalCount - (currentPage * pagingSize));
         }
@@ -112,46 +111,48 @@ router.get('/boardList', async function(req, res, currentPage) {
             tempCurrentDoc = Number(totalCount - ((currentPage-2) * pagingSize));
         }
         
+        /* 
+            1. 마지막페이지에서 다음버트 일떄 (더보기 페이지 없음)    
+            2. 1페이지 에서 이전 페이지 버튼일때 (더보기 페이지 없음)    
+        */
         if((totalCount <= (currentPage * pagingSize) && type == 'next') || (pagingSize == (currentPage * pagingSize) && type == 'prev')){//더보기할 페이지가 없을경우
-            console.log("㉾㉾㉾㉾㉾㉾더보기할 페이지 없어㉾㉾㉾㉾㉾㉾");
+
             if(type == 'prev'){
-                console.log("1111★★★11111111111111   " + totalCount);
-                currentDoc = totalCount;
+                currentDoc  = totalCount;
                 currentPage = 1;
+                console.log("nonPage ----------> prev(첫페이지로)");
                 
             }
             else if(type == 'next'){
                 if(totalCount%pagingSize != 0 ){
-                    console.log('◎◎◎◎◎◎◎◎'+totalCount%pagingSize);
                     currentDoc = totalCount%pagingSize;
                     currentPage = Math.ceil(totalCount/pagingSize);
+                    console.log("nonPage ----------> next(마지막페이지로) type1");
                 }
                 else{
                     currentDoc = pagingSize;
                     currentPage = totalCount/pagingSize ;
-                    console.log('●●●●●●●●●●●●●●'+totalCount%pagingSize);
+                    console.log("nonPage ----------> next(마지막페이지로) typee2");
+
                 }
             }
         }
-        else{
+        else{//더보기 할 페이지가 있을때
             if(type == 'prev'){
-                console.log("2222★★★★★1111111111");
                 currentDoc = tempCurrentDoc;
                 currentPage = currentPage - 1;
+                console.log("existPage ----------> prev(이전페이지로)");
             }
             else if(type == 'next'){
-                console.log("2222★★★★★22222222222222222");
                 currentDoc = tempCurrentDoc;
                 currentPage = currentPage + 1 ;
+                console.log("existPage ----------> prev(다음페이지로)");
             }
             
         }
     }
 
-    console.log("★★★★★more = length - "+snapshot.docs.length +" ////// "+currentDoc);
-
     const last = snapshot.docs[snapshot.docs.length - currentDoc];
-
 
     db.collection('board').orderBy(field, "desc").startAt(last.data().brddate).limit(pagingSize).get()
         .then((snapshot) => {
@@ -167,14 +168,16 @@ router.get('/boardList', async function(req, res, currentPage) {
             console.log('Error getting documents', err);
         });
 });
- 
+
+/* 게시물 정보 가져오기 */
 router.get('/boardRead', async function(req, res, next) {
+    
     chkidentify(res, 'loginForm');
     
     const user = firebase.auth().currentUser;
     
     /*
-    let boardId = "";dd
+    let boardId = "";
     let boardData= "";
     let fileRows = "";
     */
@@ -184,7 +187,6 @@ router.get('/boardRead', async function(req, res, next) {
         boardData = brdDoc.data();
             
         boardId = brdDoc.id
-        //console.log("######################"+boardId + "        " + user.email);
         boardData.brddate = dateFormat(boardData.brddate,"yyyy-mm-dd hh:mm");
 
         
@@ -196,35 +198,20 @@ router.get('/boardRead', async function(req, res, next) {
                     fileData.regDate = dateFormat(fileData.regDate,"yyyy-mm-dd");
                     fileRows.push(fileData);
 
-                    console.log("＠＠＠＠＠＠＠＠＠"+fileRows);
-     
-         
-         //db.collection('file').doc(boardId).get()
-
+                    console.log("＠＠＠＠＠＠＠＠＠"+fileRows);         
         });
    
-        res.render('board3/boardRead', {row : boardData, userEmail : user.email, fileRows : fileRows});   
-    
-
-       
-            
+        res.render('board3/boardRead', {row : boardData, userEmail : user.email, fileRows : fileRows});       
 });
  
+/* 게시물 작성 or 수정 페이지로 이동 */
 router.get('/boardForm',function(req,res,next){
     
-
     chkidentify(res, 'loginForm');
 
-    if (!firebase.auth().currentUser) {
-        res.redirect('loginForm');
-        return;
-    }
-
-    if (!req.query.brdno) {// new
+    if (!req.query.brdno) {//새 게시물 작성(new)
         
         var user = firebase.auth().currentUser;
-
-        console.log("게시물 작성"+user);
 
         res.render('board3/boardForm', {
             row       : "",
@@ -233,36 +220,38 @@ router.get('/boardForm',function(req,res,next){
         return;
     }
      
-    // update
+    //게시물 정보 수정 (update)
     db.collection('board').doc(req.query.brdno).get()
-          .then((doc) => {
-              var childData = doc.data();
-              var user = firebase.auth().currentUser;
-              res.render('board3/boardForm', {
-                  row: childData,
-                  userEmail : user.email
-            });
-          })
+        .then((doc) => {
+            var childData = doc.data();
+            var user = firebase.auth().currentUser;
+            res.render('board3/boardForm', {
+                row: childData,
+                userEmail : user.email
+        });
+    })
 });
  
 
 /*
-    -파일 객체의 속성들-
+    - 게시글 작성 Action
+    
+    ※파일 객체의 속성들※
 
-    fieldname:'single field',			// multer 세팅할때 지정한 필드명
-    originalname:'20201111_39842938.jpg',	// 원본파일 이름
-    encoding: '7bit',				// encoding 타입
-    mimetype: 'image/jpeg',			// 파일의 mime 타입
-    destination: '1606369318091.jpg',		// 저장된 파일 이름
-    path: 'uploads\\1606369318091.jpg',		// 파일의 저장된 경로
-    size: 2769802
+    1. fieldname:'single field',			    // multer 세팅할때 지정한 필드명
+    2. originalname:'20201111_39842938.jpg',	// 원본파일 이름
+    3. encoding: '7bit',				        // encoding 타입
+    4. mimetype: 'image/jpeg',			        // 파일의 mime 타입
+    5. destination: '1606369318091.jpg',		// 저장된 파일 이름
+    6. path: 'uploads\\1606369318091.jpg',		// 파일의 저장된 경로
+    7. size: 2769802
 */
-router.post('/boardSave', upload.single("attachFile"), function(req,res,next){
-    var user = firebase.auth().currentUser;
+router.post('/boardSave', upload.single("attachFile"), function(req, res,next){
     
     chkidentify(res, 'loginForm');
-    var postData = req.body;
+    var user = firebase.auth().currentUser;
 
+    var postData = req.body;
 
     /* 파일 가져오기 s */    
     if(req.file != null){
@@ -272,8 +261,8 @@ router.post('/boardSave', upload.single("attachFile"), function(req,res,next){
 
         /* 파일 업로드 */
         var fileName = image.originalname;
-        var strUuid = uuid.v1();
-        let file = friebaseAdmin.storage().bucket().file("images/"+strUuid);
+        var strUuid  = uuid.v1();
+        let file     = friebaseAdmin.storage().bucket().file("images/"+strUuid);
         
         bufferStream.pipe(file.createWriteStream({
             metadata :{
@@ -288,7 +277,7 @@ router.post('/boardSave', upload.single("attachFile"), function(req,res,next){
     /* 파일 가져오기 e */
     
 
-    if (!postData.brdno) { // new
+    if (!postData.brdno) {//게시물 작성 (new)
         
         /* 게시물 등록 */
         postData.brddate = Date.now(); 
@@ -313,7 +302,7 @@ router.post('/boardSave', upload.single("attachFile"), function(req,res,next){
         fileDoc.set(postDataFile);
 
     }
-    else {               // update
+    else {//게시물 정보 수정 (update)
         var doc = db.collection("board").doc(postData.brdno);
         postData.brddate = parseInt(postData.brddate);
         doc.update(postData);
@@ -322,19 +311,48 @@ router.post('/boardSave', upload.single("attachFile"), function(req,res,next){
     res.redirect('boardList');
 });
  
-router.get('/boardDelete',function(req,res,next){
+/* 게시물 삭제 */
+router.get('/boardDelete',async function(req,res,next){
     chkidentify(res, 'loginForm');
 
-    db.collection('board').doc(req.query.brdno).delete()
- 
+    var boardId = req.query.brdno;//삭제될 게시물 번호
+
+    //게시물 삭제
+    //db.collection('board').doc(boardId).delete()
+    
+    const fileRef = db.collection('file').where('boardSq', '==', boardId);
+    const fileDoc = await fileRef.get();   
+            fileRows = [];
+            fileDoc.forEach((doc) => {
+                var fileData = doc.data();
+                fileData.regDate = dateFormat(fileData.regDate,"yyyy-mm-dd");
+                fileRows.push(fileData);
+                console.log("＠＠＠＠＠＠＠＠＠"+fileRows);         
+    });
+
+    //파일 삭제
+    /*
+    var deleteFile = friebaseAdmin.storage().bucket().file("images/"+strUuid);
+
+    deleteFile.delete()
+        .then(function() {
+
+        })
+        .catch(function(error) {
+
+    });
+    */
+
     res.redirect('boardList');
 });
  
 
+/* 로그인 페이지로 이동 */
 router.get('/loginForm', function(req, res, next) {
     res.render('board3/loginForm');
 });
 
+/* 로그인 Action*/
 router.post('/loginChk', function(req, res, next) {
     firebase.auth().signInWithEmailAndPassword(req.body.id, req.body.passwd)
        .then(function(firebaseUser) {
@@ -345,6 +363,7 @@ router.post('/loginChk', function(req, res, next) {
       });   
 });
 
+/* 로그인 여부 체크 */
 function chkidentify(response, returnUrl){
     if (!firebase.auth().currentUser) {
         response.redirect(returnUrl);

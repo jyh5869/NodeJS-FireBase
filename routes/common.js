@@ -26,7 +26,7 @@ else {
 
 var db = firebase.firestore();
 
-
+/* 파일 다운로드 */
 router.get('/download', function (req, res, next) { 
     var imgName = req.query.imgName; 
     var file = firebaseAdmin.storage().bucket().file(imgName); 
