@@ -175,33 +175,25 @@ router.get('/boardRead', async function(req, res, next) {
     chkidentify(res, 'loginForm');
     
     const user = firebase.auth().currentUser;
-    
-    /*
-    let boardId = "";
-    let boardData= "";
-    let fileRows = "";
-    */
     const brdDocRef  = db.collection('board').doc(req.query.brdno);
 
-        const brdDoc = await brdDocRef.get();
-        boardData = brdDoc.data();
-            
-        boardId = brdDoc.id
-        boardData.brddate = dateFormat(boardData.brddate,"yyyy-mm-dd hh:mm");
-
+    const brdDoc = await brdDocRef.get();
+    boardData = brdDoc.data();
         
-        const fileRef = db.collection('file').where('boardSq', '==', boardId);
-        const fileDoc = await fileRef.get();   
-                fileRows = [];
-                fileDoc.forEach((doc) => {
-                    var fileData = doc.data();
-                    fileData.regDate = dateFormat(fileData.regDate,"yyyy-mm-dd");
-                    fileRows.push(fileData);
+    boardId = brdDoc.id
+    boardData.brddate = dateFormat(boardData.brddate,"yyyy-mm-dd hh:mm");
 
-                    console.log("＠＠＠＠＠＠＠＠＠"+fileRows);         
-        });
-   
-        res.render('board3/boardRead', {row : boardData, userEmail : user.email, fileRows : fileRows});       
+    
+    const fileRef = db.collection('file').where('boardSq', '==', boardId);
+    const fileDoc = await fileRef.get();   
+            fileRows = [];
+            fileDoc.forEach((doc) => {
+                var fileData = doc.data();
+                fileData.regDate = dateFormat(fileData.regDate,"yyyy-mm-dd");
+                fileRows.push(fileData);       
+    });
+
+    res.render('board3/boardRead', {row : boardData, userEmail : user.email, fileRows : fileRows});       
 });
  
 /* 게시물 작성 or 수정 페이지로 이동 */
@@ -312,37 +304,40 @@ router.post('/boardSave', upload.single("attachFile"), function(req, res,next){
 });
  
 /* 게시물 삭제 */
-router.get('/boardDelete',async function(req,res,next){
+router.get('/boardDelete', async function(req, res, next){
     chkidentify(res, 'loginForm');
 
     var boardId = req.query.brdno;//삭제될 게시물 번호
 
     //게시물 삭제
-    //db.collection('board').doc(boardId).delete()
-    
+    db.collection('board').doc(boardId).delete();
+
     const fileRef = db.collection('file').where('boardSq', '==', boardId);
     const fileDoc = await fileRef.get();   
-            fileRows = [];
-            fileDoc.forEach((doc) => {
-                var fileData = doc.data();
-                fileData.regDate = dateFormat(fileData.regDate,"yyyy-mm-dd");
-                fileRows.push(fileData);
-                console.log("＠＠＠＠＠＠＠＠＠"+fileRows);         
-    });
+        fileDoc.forEach((doc) => {
+            var fileData = doc.data();
+            var fileUuid  = fileData.fileUuid;
+            var fileSq   = fileData.fileSq;
 
-    //파일 삭제
-    /*
-    var deleteFile = friebaseAdmin.storage().bucket().file("images/"+strUuid);
+            //스토리지에 업로드된 파일삭제
+            friebaseAdmin.storage().bucket().file("images/"+fileUuid).delete()
+            .then(function() {
+                console.log("Success");
+            })
+            .catch(function(error) {
+                console.log("Fail----->" + error);
+            });
 
-    deleteFile.delete()
-        .then(function() {
-
-        })
-        .catch(function(error) {
-
-    });
-    */
-
+            //파일 데이터 삭제
+            db.collection('file').doc(fileSq).delete()
+            .then(function() {
+                console.log("Success");
+            })
+            .catch(function(error) {
+                console.log("Fail----->" + error);
+            });
+            
+        });
     res.redirect('boardList');
 });
  
