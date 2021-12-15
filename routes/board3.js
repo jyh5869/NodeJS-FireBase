@@ -358,6 +358,36 @@ router.post('/loginChk', function(req, res, next) {
       });   
 });
 
+
+/* 파일 다운로드 */
+router.get('/download', async function (req, res, next) { 
+    
+    chkidentify(res, 'loginForm');
+
+    //파일 참조 만들기
+    var starsRef = friebaseAdmin.storage().bucket().file(req.query.filePath); 
+
+    //스토리지 파일 경로 조립 후 다운로드 링크 제공
+    starsRef.createReadStream()
+    .on("error", (err) => res.status(500).json("Internal Server Error 500"))
+    .on("response", (storageResponse) => {
+        res.setHeader(
+            "content-type",
+            storageResponse.headers["content-type"]
+        );
+        res.setHeader(
+            "content-length",
+            storageResponse.headers["content-length"]
+        );
+        res.status(storageResponse.statusCode);
+    })
+    .on("end", () => res.end())
+    .pipe(res);
+
+    //res.redirect('boardRead?brdno=vlsV5bdC3GgQaaxfLRpd');
+});
+
+
 /* 로그인 여부 체크 */
 function chkidentify(response, returnUrl){
     if (!firebase.auth().currentUser) {
