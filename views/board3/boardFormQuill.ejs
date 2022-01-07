@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Test & MySite</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script> <!-- Initialize Quill editor --> 
+</head>
+
+<body>
+    <form name="form1" action="boardSaveQuill" method="POST">
+        <table border="1" style="width:600px">
+            <caption>Firebase Cloud Firesotre Database Sample</caption>
+            <colgroup>
+                <col width='15%' />
+                <col width='*%' />
+            </colgroup>
+            <tbdoy>
+                <tr>
+                    <td>Writer</td>
+                    <td><input type="text" name="brdwriter" size="20" maxlength="20" value="<%=row.brdwriter%>">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Title</td>
+                    <td><input type="text" name="brdtitle" size="70" maxlength="250" value="<%=row.brdtitle%>"></td>
+                </tr>
+                <tr>
+                    <td>Memo</td>
+                    <td>            
+                        <div class="row form-group"> <input id="brdmemo" type="hidden" name="brdmemo" value="<%=row.brdmemo%>"> <!-- Create the editor container -->
+                            <div id="editor"> </div>
+                        </div> <!-- Include the Quill library --> 
+                    </td>
+                </tr>
+            </tbdoy>
+        </table> <a href="#" onclick="goData()">저장</a> 
+        <input type="hid_den" name="brdno"   value="<%=row.brdno%>">
+        <input type="hid_den" name="brddate" value="<%=row.brddate%>"> 
+        <input type="hid_den" name="imgArray"  id="imgArray" >
+        <script> 
+
+        // 이미지 갯수 (사진 id) 
+        var imgCount = 0; 
+        // 이미지 저장용 배열 
+            var imgDatas = []; var toolbarOptions = [[{ header: [1, 2, false] }], ['bold', 'italic', 'underline'], ['image', 'cpde-block']]; var quill = new Quill('#editor', {
+                modules: {
+                    toolbar: {
+                        container: toolbarOptions, 
+                        handlers: { 
+                            //image: this.imageHandler 
+                        }
+                    }
+                }, placeholder: '내용을 입력해주세요.', theme: 'snow'
+            }); 
+            quill.setText("<%=row.brdmemo%>"); 
+            quill.on('text-change', function (delta, oldDelta, source) { 
+                    //console.clear(); 
+                document.getElementById('brdmemo').value = quill.root.innerHTML; 
+                let currrentContents = quill.getContents(); 
+                // data:~~~ 삭제
+                delta.ops.forEach(element => { 
+                    if (element.insert != null && element.insert != "") { 
+                        try { 
+                            if (element.insert.image.length > 0) { 
+                                var str = element.insert.image; 
+                                // base64 자른부분 
+                                var base64cut = str.substring(str.indexOf("d"), str.indexOf(",") + 1); 
+                                // 이미지 base64 부분 
+                                var end = str.replace(base64cut, ""); 
+                                // 이미지 타입 (png, jpeg...) 
+                                var imgType = base64cut.substring(base64cut.indexOf("/") + 1, base64cut.indexOf(";")); 
+                                var imgData = { Name: imgCount, base64Cut: base64cut, img: end, imgType: imgType } 
+                                imgDatas.push(imgData); imgCount++; } 
+                            } 
+                        catch { 
+                                //console.log(err); 
+                    } 
+                } 
+            }); 
+        }); 
+                      
+            function goData() {
+                try { 
+                    var form = document.form1; 
+                    console.log(imgDatas); 
+                    console.log(imgDatas.values); 
+                    form.imgArray.value = JSON.stringify(imgDatas); 
+                    form.submit(); 
+                } 
+                catch (err) { 
+                    console.log(err); 
+                } 
+            }
+        </script>
+    </form>
+</body>
+
+</html>

@@ -15,8 +15,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(logger('dev'));  
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit : "50mb" }));
+app.use(express.urlencoded({ limit:"50mb", extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -25,6 +25,7 @@ app.use('/users', usersRouter);
 //1. /board1 = RealTIme DataBase 
 //2. /board2 = Cloud FireStore
 //3. /board3 = Cloud FireStroe + login
+
 //app.use('/board1', require('./routes/board1'));
 //app.use('/board2', require('./routes/board2'));
 app.use('/board3', require('./routes/board3'));
@@ -78,61 +79,12 @@ firebaseHosting에서는 firebaseHosting폴더 하위의 functions 폴더에서 
 
 
 
+
+
 /*
   * 참고 URL1 = https://berkbach.com/node-js%EC%99%80-socket-io%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-%EC%B1%84%ED%8C%85-%EA%B5%AC%ED%98%84-1-cb215954847b
   * 참고 URL2 = https://geundung.dev/61?category=719250
 */
-/*
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
-
-
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
-*/
-/*
-app.get('/chatting', (req, res) => {
-  res.sendFile('socket/chatting2');
-
-io.on('connection', (socket) => {
-  console.log('a user connected');
-  socket.on('chat message', (msg) => {
-    io.emit('chat message', msg);
-  });
-  socket.on('disconnect', () => {
-  console.log('user disconnected');
-  });
-});
-*/
-
-/*
-
-io.on('connection', function(socket){
-    console.log("유저 접속 됨");
-
-    socket.on('send', function(data){
-        console.log("전달된 메시지"+data.msg);
-    });
-    
-    socket.on('disconnect', function(){
-        console.log("접속 종료"+data.msg);
-    })
-});
-
-
-
-
-http.listen(8080, () => {
-  console.log('Connected at 3000');
-});
-
-*/
-
-//make sure you keep this order
-
-
-//... 
-
 
 app.io = require('socket.io')();
 

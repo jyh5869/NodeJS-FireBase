@@ -205,7 +205,8 @@ router.get('/boardForm',function(req,res,next){
         
         var user = firebase.auth().currentUser;
 
-        res.render('board3/boardForm', {
+        res.render('board3/boardFormQuill', {
+        //res.render('board3/boardForm', {    
             row       : "",
             userEmail : user.email
         });
@@ -354,10 +355,20 @@ router.post('/loginChk', function(req, res, next) {
            res.redirect('boardList');
        })
       .catch(function(error) {
-          res.redirect('loginForm');
+          res.redirect('loginForm', error);
       });   
 });
 
+/* 로그아웃 Action */
+router.get('/logoutAction', function(req, res, next) {
+    firebase.auth().signOut()
+       .then(function(firebaseUser) {
+           res.redirect('loginForm');
+       })
+      .catch(function(error) {
+          res.redirect('loginForm', error);
+      });   
+ });
 
 /* 파일 다운로드 */
 router.get('/download', async function (req, res, next) { 
@@ -388,6 +399,141 @@ router.get('/download', async function (req, res, next) {
 });
 
 
+router.get('/boardReadQuill', function (req, res, next) {
+    firebaseAdmin.firestore().collection('posts').doc(req.query.postsno).get()
+        .then((snapshot) => {
+            var childData = snapshot.data();
+
+            // 글에 포함된 이미지 링크들 추출
+            var gsLinks = getSrc(childData.postsmemo);
+
+            const config = {
+                action: 'read',
+                expires: '03-17-2030'
+            };
+
+            function callback() {
+                childData.postsdate = dateFormat(childData.postsdate, "yyyy-mm-dd TT hh:mm:ss");
+                res.render('board3/boardFormQuill', { row: childData });
+            }
+
+            var imgCount = 0;
+
+            if (gsLinks != null) {
+                gsLinks.forEach(element => {
+                    var file = refFromURL(element);
+                    //console.log(file);
+
+                    file.getSignedUrl(
+                        config, (error, url) => {
+                            if (error) {
+                                console.log(error);
+                            }
+                            childData.postsmemo = childData.postsmemo.replace(element, url);
+                            imgCount++;
+
+                            if (imgCount === gsLinks.length)
+                                return callback();
+                        });
+                });
+            }
+            else return callback();
+        }).catch((err) => {
+            console.log(err);
+        });
+});
+
+
+// 공지 저장 위치
+const postsSavePath = "images/";
+
+router.post('/boardSaveQuill', function (req, res, next) {
+    chkidentify(res, 'loginForm');
+
+    var user = firebase.auth().currentUser;//로그인한 사용자 정보
+    var imgData = JSON.parse(req.body.imgArray);//이미지 배열
+    var postData = req.body;//파라메터
+    
+    try {
+        var bucket = friebaseAdmin.storage().bucket();
+
+        // 글에 들어있는 이미지들 firebase storage에 업로드
+        imgData.forEach(element => {
+            var bufferStream = new stream.PassThrough();
+            bufferStream.end(new Buffer.from(element.img, 'base64'));
+            
+            //var fileName = postsSavePath + postData.poststitle + '/' + element.Name + '.' + element.imgType;
+            var strUuid  = uuid.v1();
+            var fileName = postsSavePath + strUuid;
+            
+            let file = bucket.file(fileName);
+
+            
+            bufferStream.pipe(file.createWriteStream({
+                metadata: {
+                    contentType: 'image/' + element.imgType
+                }
+            })).on('error', (err) => { console.log(err); })
+                .on('finish', () => { console.log(fileName + ' upload Complate!'); });
+
+            // gsLink 제작
+            var gsLink = creFromURL('nodejs-54f7b.appspot.com', "/" + fileName);
+            console.log("★★★★★★★★★★ "+fileName);
+            console.log("★★★★★★★★★★ "+gsLink);
+
+            console.log("★★★★★★★★★★ "+postData.brdmemo);
+            
+            // 글에 삽입되어 있는 이미지 링크들 변경
+            postData.brdmemo = postData.brdmemo.replace(element.base64Cut + element.img, gsLink);
+            console.log("★★★★★★★★★★ "+postData.brdmemo);
+        });
+
+        console.log(postData.brdmemo);
+    } catch (err) {
+        console.log(err);
+    }
+
+    if (!postData.brdno) {//신규
+        console.log("신규＃＃＃＃＃＃＃");
+        postData.brddate = Date.now(); 
+
+        var boardDoc = db.collection("board").doc();
+        postData.brdno = boardDoc.id;
+        postData.brdwriter = user.email;
+
+        var postData = {
+            brdno     : postData.brdno,
+            brdtitle  : postData.brdtitle,
+            brdmemo   : postData.brdmemo,
+            brdwriter : postData.brdwriter,
+            brddate   : Date.now()
+        };
+
+        boardDoc.set(postData);
+    }
+    else {//변경s
+        console.log("변경＃＃＃＃＃＃＃");
+        boardDoc = db.collection('board').doc(postData.brdno);
+        boardDoc.update(postData);
+
+        boardDoc.update({
+            brdno     : postData.brdno,
+            brdtitle  : postData.brdtitle,
+            brdmemo   : postData.brdmemo,
+            brdwriter : postData.brdwriter,
+            brddate   : Date.now()
+        });
+    }
+
+    res.redirect('boardList');
+    return;
+});
+
+
+//////////////////////////////////////////////////////////
+/////////////////////////공통함수//////////////////////////
+//////////////////////////////////////////////////////////
+
 /* 로그인 여부 체크 */
 function chkidentify(response, returnUrl){
     if (!firebase.auth().currentUser) {
@@ -395,6 +541,31 @@ function chkidentify(response, returnUrl){
         return;
     }
 }
+
+/* 파일 링크를 이용하여 파일 오브젝트 만들기 */  
+function refFromURL(gsLink) { 
+    var fileEntryTemp = gsLink.replace("gs://", ""); 
+    var bucketName = fileEntryTemp.substring(0, fileEntryTemp.indexOf("/")); 
+    var filename = gsLink.match("gs://" + bucketName + "/" + "(.*)")[1]; 
+    var file = friebaseAdmin.storage().bucket().file(filename); 
+    
+    return file; 
+} 
+/* 파일 링크 생성 */
+function creFromURL(bucketName, fileName) { 
+    var gsLink = "gs://" + bucketName + fileName; 
+    
+    return gsLink; 
+} 
+/* 이미지 경로 추출 */
+function getSrc(str) { 
+    var strReg = new RegExp("gs://*[^>]*\\.(jpg|gif|png|jpeg)","gim"); 
+    var xArr = str.match(strReg); 
+    
+    return xArr; 
+}
+
+
 
 
 module.exports = router;
