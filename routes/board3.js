@@ -205,8 +205,8 @@ router.get('/boardForm',function(req,res,next){
         
         var user = firebase.auth().currentUser;
 
-        res.render('board3/boardFormQuill', {
-        //res.render('board3/boardForm', {    
+        //res.render('board3/boardFormQuill', {//1. Quill 에디터를 이용한 글 쓰기
+        res.render('board3/boardForm', {//2. 단순 다중 파일첨부 글쓰기      
             row       : "",
             userEmail : user.email
         });
@@ -218,7 +218,8 @@ router.get('/boardForm',function(req,res,next){
         .then((doc) => {
             var childData = doc.data();
             var user = firebase.auth().currentUser;
-            res.render('board3/boardForm', {
+            //res.render('board3/boardFormQuill', {//1. Quill 에디터를 이용한 글 쓰기
+            res.render('board3/boardForm', { //2. 단순 다중 파일첨부 글쓰기
                 row: childData,
                 userEmail : user.email
         });
@@ -239,13 +240,83 @@ router.get('/boardForm',function(req,res,next){
     6. path: 'uploads\\1606369318091.jpg',		// 파일의 저장된 경로
     7. size: 2769802
 */
+router.post('/boardSave2', upload.any(), function(req, res,next){
+    
+    chkidentify(res, 'loginForm');
+    var user = firebase.auth().currentUser;
+
+    var postData = req.body;
+    var imgData = req.files;
+
+    /* 파일 가져오기 s */    
+    if(req.files != null){
+        
+        imgData.forEach(element => {
+            var image = element;
+            var bufferStream = new stream.PassThrough();
+            bufferStream.end(new Buffer.from(image.buffer, 'asci'));
+
+            /* 파일 업로드 */
+            var fileName = image.originalname;
+            var strUuid  = uuid.v1();
+            let file     = friebaseAdmin.storage().bucket().file("images/"+strUuid);
+            bufferStream.pipe(file.createWriteStream({
+                metadata :{
+                    contentType : image.mimetype
+                }
+            })).on('error', (err) => {
+                console.log(err);
+            }).on("finish", () => {
+                console.log(fileName + "   finish!!");
+            });
+
+            /*  파일 데이터 저장 */
+            var fileDoc = db.collection('file').doc();
+
+            var postDataFile = {
+                fileSq   : fileDoc.id,
+                boardSq  : boardDoc.id,
+                fileNm   : fileName,
+                fileUuid : strUuid,
+                regDate  : Date.now()
+            };
+
+            fileDoc.set(postDataFile);
+            });
+    }
+    /* 파일 가져오기 e */
+    
+    
+    if (!postData.brdno) {//게시물 작성 (new)
+        
+        //게시물 등록 
+        postData.brddate = Date.now(); 
+
+        var boardDoc = db.collection("board").doc();
+        postData.brdno = boardDoc.id;
+        postData.brdwriter = user.email;
+        boardDoc.set(postData);
+
+        //첨부파일 등록
+
+        
+
+    }
+    else {//게시물 정보 수정 (update)
+        var doc = db.collection("board").doc(postData.brdno);
+        postData.brddate = parseInt(postData.brddate);
+        doc.update(postData);
+    }
+     
+    res.redirect('boardList');
+});
 router.post('/boardSave', upload.single("attachFile"), function(req, res,next){
     
     chkidentify(res, 'loginForm');
     var user = firebase.auth().currentUser;
 
     var postData = req.body;
-
+    
     /* 파일 가져오기 s */    
     if(req.file != null){
         var image = req.file;
@@ -337,12 +408,10 @@ router.get('/boardDelete', async function(req, res, next){
             .catch(function(error) {
                 console.log("Fail----->" + error);
             });
-            
         });
     res.redirect('boardList');
 });
  
-
 /* 로그인 페이지로 이동 */
 router.get('/loginForm', function(req, res, next) {
     res.render('board3/loginForm');
@@ -394,18 +463,15 @@ router.get('/download', async function (req, res, next) {
     })
     .on("end", () => res.end())
     .pipe(res);
-
-    //res.redirect('boardRead?brdno=vlsV5bdC3GgQaaxfLRpd');
 });
 
-
+/* 에디터를 이용한 게시물 읽기 */
 router.get('/boardReadQuill', function (req, res, next) {
-    firebaseAdmin.firestore().collection('posts').doc(req.query.postsno).get()
+    db.collection('board').doc(req.query.brdno).get()
         .then((snapshot) => {
             var childData = snapshot.data();
-
             // 글에 포함된 이미지 링크들 추출
-            var gsLinks = getSrc(childData.postsmemo);
+            var gsLinks = getSrc(childData.brdmemo);
 
             const config = {
                 action: 'read',
@@ -413,7 +479,7 @@ router.get('/boardReadQuill', function (req, res, next) {
             };
 
             function callback() {
-                childData.postsdate = dateFormat(childData.postsdate, "yyyy-mm-dd TT hh:mm:ss");
+                childData.brddate = dateFormat(childData.brddate, "yyyy-mm-dd TT hh:mm:ss");
                 res.render('board3/boardFormQuill', { row: childData });
             }
 
@@ -422,19 +488,19 @@ router.get('/boardReadQuill', function (req, res, next) {
             if (gsLinks != null) {
                 gsLinks.forEach(element => {
                     var file = refFromURL(element);
-                    //console.log(file);
 
-                    file.getSignedUrl(
-                        config, (error, url) => {
-                            if (error) {
-                                console.log(error);
-                            }
-                            childData.postsmemo = childData.postsmemo.replace(element, url);
-                            imgCount++;
+                    file.getSignedUrl( config, (error, url) => {
+                        if (error) {
+                            console.log(error);
+                        }
+                        childData.brdmemo = childData.brdmemo.replace(element, url);
+                        
+                        console.log(childData.brdmemo)
+                        imgCount++;
 
-                            if (imgCount === gsLinks.length)
-                                return callback();
-                        });
+                        if (imgCount === gsLinks.length)
+                            return callback();
+                    });
                 });
             }
             else return callback();
@@ -443,17 +509,45 @@ router.get('/boardReadQuill', function (req, res, next) {
         });
 });
 
+var multiparty = require('multiparty');
+const { request } = require('http');
 
-// 공지 저장 위치
+const formidable = require('formidable')
+var fs = require('fs')
+
+router.post('/boardSaveQuill2', async function (req, res, next) {
+
+    
+    var form = new formidable.IncomingForm();
+    form.multiples = true;
+    console.log(req.files);
+    form.parse(req, function(err, fields, files) {
+        console.log(files.length);
+        
+        console.log(fields);
+  
+        var imgData =  fields.imgArray2;
+        //var imgData = files
+        //var imgData = req.input_file[0];
+        console.log(imgData.length);
+    
+    });
+
+    res.send({"result": "ok"});
+
+});
+// 파일 저장 위치 1. 이미지 , 2. 문서
 const postsSavePath = "images/";
+const docSavePath   = "documents/";
 
+/* 에디터를 이용한 게시물 및 첨부파일 저장 */
 router.post('/boardSaveQuill', function (req, res, next) {
     chkidentify(res, 'loginForm');
 
     var user = firebase.auth().currentUser;//로그인한 사용자 정보
     var imgData = JSON.parse(req.body.imgArray);//이미지 배열
     var postData = req.body;//파라메터
-    
+
     try {
         var bucket = friebaseAdmin.storage().bucket();
 
@@ -464,7 +558,7 @@ router.post('/boardSaveQuill', function (req, res, next) {
             
             //var fileName = postsSavePath + postData.poststitle + '/' + element.Name + '.' + element.imgType;
             var strUuid  = uuid.v1();
-            var fileName = postsSavePath + strUuid;
+            var fileName = postsSavePath + strUuid + "."+ element.imgType;
             
             let file = bucket.file(fileName);
 
@@ -478,23 +572,22 @@ router.post('/boardSaveQuill', function (req, res, next) {
 
             // gsLink 제작
             var gsLink = creFromURL('nodejs-54f7b.appspot.com', "/" + fileName);
-            console.log("★★★★★★★★★★ "+fileName);
-            console.log("★★★★★★★★★★ "+gsLink);
 
-            console.log("★★★★★★★★★★ "+postData.brdmemo);
-            
             // 글에 삽입되어 있는 이미지 링크들 변경
             postData.brdmemo = postData.brdmemo.replace(element.base64Cut + element.img, gsLink);
-            console.log("★★★★★★★★★★ "+postData.brdmemo);
+
         });
 
         console.log(postData.brdmemo);
-    } catch (err) {
+    } 
+    catch (err) {
         console.log(err);
     }
 
+
+    //게시글 신구 등록 및 변경
     if (!postData.brdno) {//신규
-        console.log("신규＃＃＃＃＃＃＃");
+
         postData.brddate = Date.now(); 
 
         var boardDoc = db.collection("board").doc();
@@ -511,10 +604,10 @@ router.post('/boardSaveQuill', function (req, res, next) {
 
         boardDoc.set(postData);
     }
-    else {//변경s
-        console.log("변경＃＃＃＃＃＃＃");
+    else {//변경
+
         boardDoc = db.collection('board').doc(postData.brdno);
-        boardDoc.update(postData);
+        //boardDoc.update(postData);
 
         boardDoc.update({
             brdno     : postData.brdno,
@@ -528,7 +621,6 @@ router.post('/boardSaveQuill', function (req, res, next) {
     res.redirect('boardList');
     return;
 });
-
 
 //////////////////////////////////////////////////////////
 /////////////////////////공통함수//////////////////////////
@@ -564,8 +656,6 @@ function getSrc(str) {
     
     return xArr; 
 }
-
-
 
 
 module.exports = router;

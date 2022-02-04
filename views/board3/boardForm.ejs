@@ -11,8 +11,8 @@
     <!--상단 컨테이너 시작-->
     <%- include ("./common/header") %>
     <!--상단 컨테이너 끝-->
-    <div> - conection ID : <%=user.email%></div> 
-    <form name="form1" action="boardSaveQuill" method="post" enctype="multipart/form-data" >
+    <div> - conection ID : <%=userEmail%></div> 
+    <form name="form1" id="form1" action="boardSave2" method="post" enctype="multipart/form-data" >
         <table border="1" style="width:600px">
             <caption>board sample for firebase (Firestore Database) Write</caption>
             <colgroup>
@@ -34,11 +34,17 @@
                 </tr>
                 <tr>
                     <td>File</td>
-                    <td><input type="file" name="attachFile" id="attachFile" ></td>
+                    <td><input type="file" name="attachFile" id="attachFile" multiple></td>
+                </tr>
+                <tr>
+                    <td>FileList</td>
+                    <td>
+                        <div id="fileList" neme="fileList"></div>
+                    </td>
                 </tr>
             </tbody>
         </table>
-        <a href="#" onclick="fileCheck();">Save</a>
+        <a href="#" onclick="regAction();">Save</a>
         <a href="#" onclick="javascript:boardAction('boardDelete?brdno=<%=row.brdno%>','List');">List</a>
         
         <input type="hidden" name="brdno" value="<%=row.brdno%>">
@@ -46,30 +52,104 @@
         
     </form>
     <script>    
-        function fileCheck() {
-				//input file 태그.
-				var file = document.getElementById('attachFile');
-				//파일 경로.
-				var filePath = file.value;
-				//전체경로를 \ 나눔.
-				var filePathSplit = filePath.split('\\'); 
-				//전체경로를 \로 나눈 길이.
-				var filePathLength = filePathSplit.length;
-				//마지막 경로를 .으로 나눔.
-				var fileNameSplit = filePathSplit[filePathLength-1].split('.');
-				//파일명 : .으로 나눈 앞부분
-				var fileName = fileNameSplit[0];
-				//파일 확장자 : .으로 나눈 뒷부분
-				var fileExt = fileNameSplit[1];
-				//파일 크기
-				var fileSize = file.files[0].size;
+        function fileCheck2323() {
+            //input file 태그.
+            var file = document.getElementById('attachFile');
+            //파일 경로.
+            var filePath = file.value;
+            //전체경로를 \ 나눔.
+            var filePathSplit = filePath.split('\\'); 
+            //전체경로를 \로 나눈 길이.
+            var filePathLength = filePathSplit.length;
+            //마지막 경로를 .으로 나눔.
+            var fileNameSplit = filePathSplit[filePathLength-1].split('.');
+            //파일명 : .으로 나눈 앞부분
+            var fileName = fileNameSplit[0];
+            //파일 확장자 : .으로 나눈 뒷부분
+            var fileExt = fileNameSplit[1];
+            //파일 크기
+            var fileSize = file.files[0].size;
 
+            form1.submit();
+        }
+        
+        $(document).ready(function() {
+        // input file 파일 첨부시 fileCheck 함수 실행
 
-               
+            $("#attachFile").on("change", fileCheck);
+        });
 
-                form1.submit();
-			}
+        // 파일 현재 필드 숫자 totalCount랑 비교값
+        var fileCount = 0;
+        // 해당 숫자를 수정하여 전체 업로드 갯수를 정한다.
+        var totalCount = 10;
+        // 파일 고유넘버
+        var fileNum = 0;
+        // 첨부파일 배열
+        var content_files = new Array();
 
+        function fileCheck(e) {
+            var files = e.target.files;
+            
+            // 파일 배열 담기
+            var filesArr = Array.prototype.slice.call(files);
+        
+            // 파일 개수 확인 및 제한
+            if (fileCount + filesArr.length > totalCount) {
+            $.alert('파일은 최대 '+totalCount+'개까지 업로드 할 수 있습니다.');
+            return;
+            } 
+            else {
+                fileCount = fileCount + filesArr.length;
+            }
+            
+            // 각각의 파일 배열담기 및 기타
+            filesArr.forEach(function (f) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                content_files.push(f);
+                $('#fileList').append(
+                    '<div id="file' + fileNum + '" onclick="fileDelete(\'file' + fileNum + '\')">'
+                    + '<font style="font-size:12px">' + f.name + '</font>'  
+                    + '<img src="/img/icon_minus.png" style="width:20px; height:auto; vertical-align: middle; cursor: pointer;"/>' 
+                    + '<div/>'
+                );
+                fileNum ++;
+            };
+            reader.readAsDataURL(f);
+            });
+            console.log(content_files);
+            //초기화 한다.
+            //$("#attachFile").val("");
+        }
+
+        // 파일 부분 삭제 함수
+        function fileDelete(fileNum){
+            var no = fileNum.replace(/[^0-9]/g, "");
+            content_files[no].is_delete = true;
+            $('#' + fileNum).remove();
+            fileCount --;
+            console.log(content_files);
+        }
+
+        //폼 값 전송
+        function regAction() {  
+
+            //var form = $('#form1')[0];
+
+            for (var x = 0; x < content_files.length; x++) {
+                // 삭제 안한것만 담아 준다. 
+                if(!content_files[x].is_delete){
+                    form1.append("attachFile", content_files[x]);
+                    //form.append("file", content_files[x]);
+                    //form.append("<input type='file' value='"+content_files[x]+"' />");
+                    //formData.innerHTML = formData.innerHTML + "<input type='file'  value='"+content_files[x]+"'/>";
+                }
+            }
+            //$('#imgArray2').val(content_files); 
+
+            form1.submit();
+        }
     </script>  
 </body>
 </html>

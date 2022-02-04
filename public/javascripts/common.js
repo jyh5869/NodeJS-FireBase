@@ -24,3 +24,20 @@ function boardAction(url, state){
     }
 
 }
+
+
+/* 엔티티 문자 변환 함수 ex) &lt; -> '<' */
+function decodeHTMLEntities (str) {
+    if(str !== undefined && str !== null && str !== '') {
+        str = String(str);
+
+        str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
+        str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+        var element = document.createElement('div');
+        element.innerHTML = str;
+        str = element.textContent;
+        element.textContent = '';
+    }
+
+    return str;
+}
