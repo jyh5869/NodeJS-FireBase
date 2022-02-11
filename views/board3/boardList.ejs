@@ -12,7 +12,8 @@
     <%- include ("./common/header") %>
     <!--상단 컨테이너 끝-->
     <br>
-    <div><a href="boardForm"> - Write - </a></div><br>
+    <div><a href="boardForm?boardType=normal"> - Write Normal - </a></div><br>
+    <div><a href="boardForm?boardType=editor"> - Write Editor - </a></div><br>
 
     <table border="1" style="width:600px">
         <caption>board sample for firebase (Firestore Database)</caption>
@@ -20,6 +21,7 @@
             <col width='8%' />
             <col width='*%' />
             <col width='15%' />
+            <col width='10%' />
             <col width='15%' />
         </colgroup>
         <thead>
@@ -27,6 +29,7 @@
                 <th>No.</th>
                 <th>Title</th>
                 <th>Writer</th>
+                <th>Type</th>
                 <th>Date</th>
             </tr>
         </thead>
@@ -36,9 +39,19 @@
         %>
             <tr>
                 <td><%=rows.length-i%></td>
-                <!-- <td><a href='boardRead?brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a></td> -->
-                <td><a href='boardReadQuill?brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a></td>
-                <td><%=rows[i].brdwriter%></td>
+                <%
+                    if(rows[i].brdType == "normal"){
+                %>
+                    <td><a href='boardRead?boardType=normal&brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a></td><!-- 일만 파일 업로드 게시판 -->
+                <%
+                    } else {
+                %>
+                    <td><a href='boardReadQuill?brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a></td> <!-- 에디터를 사용한 파일 업로드 게시판-->
+                <%
+                    }
+                %>  
+                <td><%=rows[i].brdwriter%>  </td>
+                <td><%=rows[i].brdType%>  </td>
                 <td><%=rows[i].brddate%></td>
             </tr>
         <%

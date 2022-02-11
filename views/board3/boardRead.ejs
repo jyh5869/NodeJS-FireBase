@@ -29,18 +29,24 @@
                 <tr>
                     <td>Memo</td>
                     <td><%=row.brdmemo%></td>
+                </tr>       
+                <tr>
+                    <td>Image</td>
+                    <td>   
+                        <%
+                            for(var i=0; i<fileRows.length; i++) {
+                        %>
+                        <div style="width: 45%; float: left;padding: 10pxs;margin: 10px;">
+                            <a href='download?filePath=images/<%=fileRows[i].fileUuid%>'>
+                                <div><img src="download?filePath=images/<%=fileRows[i].fileUuid%>" alt="<%=fileRows[i].fileNm%>" width="100%" ></div>
+                                <div><%=fileRows[i].fileNm%></div>
+                            </a>
+                        </div>    
+                        <%
+                            }
+                        %>
+                    </td>
                 </tr>
-
-                <%
-                    for(var i=0; i<fileRows.length; i++) {
-                %>
-                    <tr>
-                        <td>Image</td>
-                        <td><a href='download?filePath=images/06865680-5720-11ec-a8c7-7b31fac03aad'><img src="gs://nodejs-54f7b.appspot.com/images/06865680-5720-11ec-a8c7-7b31fac03aad" alt="<%=fileRows[i].fileNm%>"></td>
-                    </tr>
-                <%
-                    }
-                %>
             </tbody>
         </table>   
         <a href="#" onclick="history.back(-1)">List</a>
@@ -52,8 +58,8 @@
             <a href="boardDelete?brdno=<%=row.brdno%>">Delete</a>
             <a href="boardForm?brdno=<%=row.brdno%>">Modify</a>
             -->
-            <a href="javascript:boardAction('boardDelete?brdno=<%=row.brdno%>','Delete');">Delete</a>
-            <a href="javascript:boardAction('boardForm?brdno=<%=row.brdno%>','Modify')">Modify</a>
+            <a href="javascript:boardAction('boardDelete?boardType=normal&brdno=<%=row.brdno%>','Delete');">Delete</a>
+            <a href="javascript:boardAction('boardForm?boardType=normal&brdno=<%=row.brdno%>','Modify')">Modify</a>
         <%
             }
         %>

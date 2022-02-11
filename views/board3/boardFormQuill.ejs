@@ -23,7 +23,7 @@
             <tbdoy>
                 <tr>
                     <td>Writer</td>
-                    <td><input type="text" name="brdwriter" size="20" maxlength="20" value="<%=row.brdwriter%>">
+                    <td><input type="text" name="brdwriter" size="20" maxlength="20" value="<%=userEmail%>" readonly>
                     </td>
                 </tr>
                 <tr>
@@ -41,10 +41,10 @@
                 </tr>
             </tbdoy>
         </table> <a href="#" onclick="goData()">저장</a> 
-        <input type="hidden" name="brdno"   value="<%=row.brdno%>">
-        <input type="hidden" name="brddate" value="<%=row.brddate%>"> 
-        <input type="hidden" name="imgArray"  id="imgArray" >
-        
+        <input type="hidden" name="brdno"    value="<%=row.brdno%>">
+        <input type="hidden" name="brddate"  value="<%=row.brddate%>"> 
+        <input type="hidden" name="imgArray" value=""  id="imgArray" >
+        <input type="hidden" name="brdType"  value="editor">
     </form>
 </body>
 <script> 

@@ -49,6 +49,10 @@ var db = firebase.firestore();
     ctrl shift p  - 명령 팔렛트
 */
 
+// 파일 저장 위치 1. 이미지 , 2. 문서
+const imgSavePath = "images/";
+const docSavePath   = "documents/";
+
 router.get('/',function(req, res, next) {
     res.redirect('boardList');
 });
@@ -190,40 +194,78 @@ router.get('/boardRead', async function(req, res, next) {
             fileDoc.forEach((doc) => {
                 var fileData = doc.data();
                 fileData.regDate = dateFormat(fileData.regDate,"yyyy-mm-dd");
-                fileRows.push(fileData);       
+                fileRows.push(fileData);    
     });
 
     res.render('board3/boardRead', {row : boardData, userEmail : user.email, fileRows : fileRows});       
 });
  
 /* 게시물 작성 or 수정 페이지로 이동 */
-router.get('/boardForm',function(req,res,next){
+router.get('/boardForm',async function(req, res,next){
     
     chkidentify(res, 'loginForm');
+    const user = firebase.auth().currentUser;
+    
+    var boardType = req.query.boardType;
 
     if (!req.query.brdno) {//새 게시물 작성(new)
-        
-        var user = firebase.auth().currentUser;
-
-        //res.render('board3/boardFormQuill', {//1. Quill 에디터를 이용한 글 쓰기
-        res.render('board3/boardForm', {//2. 단순 다중 파일첨부 글쓰기      
+        if(boardType == "normal"){//일반 글 작성하기
+            res.render('board3/boardForm', {//2. 단순 다중 파일첨부 글쓰기      
+                row       : "",
+                fileRows  : "",
+                boardType : boardType,
+                userEmail : user.email
+            });
+        }
+        else{//Quill 에디터 글 작성하기
+            res.render('board3/boardFormQuill', {//1. Quill 에디터를 이용한 글 쓰기
+            //res.render('board3/boardForm', {//2. 단순 다중 파일첨부 글쓰기      
             row       : "",
+            fileRows  : "",
+            boardType : boardType,
             userEmail : user.email
         });
+        }
+
         return;
     }
      
     //게시물 정보 수정 (update)
-    db.collection('board').doc(req.query.brdno).get()
-        .then((doc) => {
-            var childData = doc.data();
-            var user = firebase.auth().currentUser;
-            //res.render('board3/boardFormQuill', {//1. Quill 에디터를 이용한 글 쓰기
-            res.render('board3/boardForm', { //2. 단순 다중 파일첨부 글쓰기
-                row: childData,
-                userEmail : user.email
+    if(boardType == "normal"){//일반 글 업데이트
+
+        const brdDocRef  = db.collection('board').doc(req.query.brdno);
+
+        const brdDoc = await brdDocRef.get();
+        boardData = brdDoc.data();
+            
+        boardId = brdDoc.id
+        boardData.brddate = dateFormat(boardData.brddate,"yyyy-mm-dd hh:mm");
+
+        
+        const fileRef = db.collection('file').where('boardSq', '==', boardId);
+        const fileDoc = await fileRef.get();   
+                fileRows = [];
+                fileDoc.forEach((doc) => {
+                    var fileData = doc.data();
+                    fileData.regDate = dateFormat(fileData.regDate,"yyyy-mm-dd");
+                    fileRows.push(fileData);    
         });
-    })
+
+        res.render('board3/boardForm', {row : boardData, userEmail : user.email, fileRows : fileRows});
+    }
+    else {//Quill 에디터 글 업데이트
+
+        db.collection('board').doc(req.query.brdno).get()
+            .then((doc) => {
+                var childData = doc.data();
+                var user = firebase.auth().currentUser;
+                res.render('board3/boardFormQuill', {//1. Quill 에디터를 이용한 글 쓰기
+                //res.render('board3/boardForm', { //2. 단순 다중 파일첨부 글쓰기
+                    row: childData,
+                    userEmail : user.email
+            });
+        })
+    }
 });
  
 
@@ -240,22 +282,71 @@ router.get('/boardForm',function(req,res,next){
     6. path: 'uploads\\1606369318091.jpg',		// 파일의 저장된 경로
     7. size: 2769802
 */
-router.post('/boardSave2', upload.any(), function(req, res,next){
+var multiparty = require('multiparty');
+const { request } = require('http');
+
+const formidable = require('formidable')
+var fs = require('fs')
+
+router.post('/boardSave', upload.any(), async function(req, res,next){
     
     chkidentify(res, 'loginForm');
     var user = firebase.auth().currentUser;
-
+    
     var postData = req.body;
     var imgData = req.files;
+    console.log(imgData);
+    /* 신규일경우 게시물 등록, 수정일 경우 게시물 수정 및 기존 첨부파일 삭제 */
+    var boardDoc = db.collection("board").doc();
 
-    /* 파일 가져오기 s */    
-    if(req.files != null){
+    if (!postData.brdno) { //게시물 작성 (new)
+        postData.brddate = Date.now();
+        postData.brdno = boardDoc.id;
+        postData.brdwriter = user.email;
+        boardDoc.set(postData);
+    }
+    else {//게시물 정보 수정 (update)
+        var doc = db.collection("board").doc(postData.brdno);
+        postData.brddate = parseInt(postData.brddate);
+        doc.update(postData);
+
+        //첨부파일 전체 삭제(스토리지, 파일 데이터)
+        const fileRef = db.collection('file').where('boardSq', '==', postData.brdno);
+        const fileDoc = await fileRef.get();   
         
+        fileDoc.forEach((doc) => {
+            var fileData  = doc.data();
+            var fileUuid  = fileData.fileUuid;
+            var fileSq    = fileData.fileSq;
+
+            //스토리지에 업로드된 파일삭제
+            friebaseAdmin.storage().bucket().file("images/"+fileUuid).delete()
+            .then(function() {
+                console.log("Success");
+            })
+            .catch(function(error) {
+                console.log("Fail----->" + error);
+            });
+
+            //파일 데이터 삭제
+            db.collection('file').doc(fileSq).delete()
+            .then(function() {
+                console.log("Success");
+            })
+            .catch(function(error) {
+                console.log("Fail----->" + error);
+            });
+        });
+    }
+
+    /* 파일 존재 여부 확인 후 파일 등록 s */    
+    if(imgData != null){
+
         imgData.forEach(element => {
             var image = element;
             var bufferStream = new stream.PassThrough();
             bufferStream.end(new Buffer.from(image.buffer, 'asci'));
-
+  
             /* 파일 업로드 */
             var fileName = image.originalname;
             var strUuid  = uuid.v1();
@@ -270,7 +361,7 @@ router.post('/boardSave2', upload.any(), function(req, res,next){
                 console.log(fileName + "   finish!!");
             });
 
-            /*  파일 데이터 저장 */
+            /* 파일 데이터 저장 */
             var fileDoc = db.collection('file').doc();
 
             var postDataFile = {
@@ -285,96 +376,10 @@ router.post('/boardSave2', upload.any(), function(req, res,next){
             });
     }
     /* 파일 가져오기 e */
-    
-    
-    if (!postData.brdno) {//게시물 작성 (new)
-        
-        //게시물 등록 
-        postData.brddate = Date.now(); 
-
-        var boardDoc = db.collection("board").doc();
-        postData.brdno = boardDoc.id;
-        postData.brdwriter = user.email;
-        boardDoc.set(postData);
-
-        //첨부파일 등록
-
-        
-
-    }
-    else {//게시물 정보 수정 (update)
-        var doc = db.collection("board").doc(postData.brdno);
-        postData.brddate = parseInt(postData.brddate);
-        doc.update(postData);
-    }
      
     res.redirect('boardList');
 });
-router.post('/boardSave', upload.single("attachFile"), function(req, res,next){
-    
-    chkidentify(res, 'loginForm');
-    var user = firebase.auth().currentUser;
 
-    var postData = req.body;
-    
-    /* 파일 가져오기 s */    
-    if(req.file != null){
-        var image = req.file;
-        var bufferStream = new stream.PassThrough();
-        bufferStream.end(new Buffer.from(image.buffer, 'asci'));
-
-        /* 파일 업로드 */
-        var fileName = image.originalname;
-        var strUuid  = uuid.v1();
-        let file     = friebaseAdmin.storage().bucket().file("images/"+strUuid);
-        
-        bufferStream.pipe(file.createWriteStream({
-            metadata :{
-                contentType : image.mimetype
-            }
-        })).on('error', (err) => {
-            console.log(err);
-        }).on("finish", () => {
-            console.log(fileName + "   finish!!");
-        });
-    }
-    /* 파일 가져오기 e */
-    
-
-    if (!postData.brdno) {//게시물 작성 (new)
-        
-        /* 게시물 등록 */
-        postData.brddate = Date.now(); 
-
-        var boardDoc = db.collection("board").doc();
-        postData.brdno = boardDoc.id;
-        postData.brdwriter = user.email;
-        boardDoc.set(postData);
-
-        /* 첨부파일 등록 */
-
-        var fileDoc = db.collection('file').doc();
-        
-        var postDataFile = {
-            fileSq   : fileDoc.id,
-            boardSq  : boardDoc.id,
-            fileNm   : fileName,
-            fileUuid : strUuid,
-            regDate  : Date.now()
-        };
-
-        fileDoc.set(postDataFile);
-
-    }
-    else {//게시물 정보 수정 (update)
-        var doc = db.collection("board").doc(postData.brdno);
-        postData.brddate = parseInt(postData.brddate);
-        doc.update(postData);
-    }
-     
-    res.redirect('boardList');
-});
- 
 /* 게시물 삭제 */
 router.get('/boardDelete', async function(req, res, next){
     chkidentify(res, 'loginForm');
@@ -387,9 +392,9 @@ router.get('/boardDelete', async function(req, res, next){
     const fileRef = db.collection('file').where('boardSq', '==', boardId);
     const fileDoc = await fileRef.get();   
         fileDoc.forEach((doc) => {
-            var fileData = doc.data();
+            var fileData  = doc.data();
             var fileUuid  = fileData.fileUuid;
-            var fileSq   = fileData.fileSq;
+            var fileSq    = fileData.fileSq;
 
             //스토리지에 업로드된 파일삭제
             friebaseAdmin.storage().bucket().file("images/"+fileUuid).delete()
@@ -467,6 +472,10 @@ router.get('/download', async function (req, res, next) {
 
 /* 에디터를 이용한 게시물 읽기 */
 router.get('/boardReadQuill', function (req, res, next) {
+    chkidentify(res, 'loginForm');
+
+    var user = firebase.auth().currentUser;//로그인한 사용자 정보
+
     db.collection('board').doc(req.query.brdno).get()
         .then((snapshot) => {
             var childData = snapshot.data();
@@ -480,7 +489,7 @@ router.get('/boardReadQuill', function (req, res, next) {
 
             function callback() {
                 childData.brddate = dateFormat(childData.brddate, "yyyy-mm-dd TT hh:mm:ss");
-                res.render('board3/boardFormQuill', { row: childData });
+                res.render('board3/boardFormQuill', { row: childData, userEmail : user.email });
             }
 
             var imgCount = 0;
@@ -509,36 +518,6 @@ router.get('/boardReadQuill', function (req, res, next) {
         });
 });
 
-var multiparty = require('multiparty');
-const { request } = require('http');
-
-const formidable = require('formidable')
-var fs = require('fs')
-
-router.post('/boardSaveQuill2', async function (req, res, next) {
-
-    
-    var form = new formidable.IncomingForm();
-    form.multiples = true;
-    console.log(req.files);
-    form.parse(req, function(err, fields, files) {
-        console.log(files.length);
-        
-        console.log(fields);
-  
-        var imgData =  fields.imgArray2;
-        //var imgData = files
-        //var imgData = req.input_file[0];
-        console.log(imgData.length);
-    
-    });
-
-    res.send({"result": "ok"});
-
-});
-// 파일 저장 위치 1. 이미지 , 2. 문서
-const postsSavePath = "images/";
-const docSavePath   = "documents/";
 
 /* 에디터를 이용한 게시물 및 첨부파일 저장 */
 router.post('/boardSaveQuill', function (req, res, next) {
@@ -556,9 +535,9 @@ router.post('/boardSaveQuill', function (req, res, next) {
             var bufferStream = new stream.PassThrough();
             bufferStream.end(new Buffer.from(element.img, 'base64'));
             
-            //var fileName = postsSavePath + postData.poststitle + '/' + element.Name + '.' + element.imgType;
+            //var fileName = imgSavePath + postData.poststitle + '/' + element.Name + '.' + element.imgType;
             var strUuid  = uuid.v1();
-            var fileName = postsSavePath + strUuid + "."+ element.imgType;
+            var fileName = imgSavePath + strUuid + "."+ element.imgType;
             
             let file = bucket.file(fileName);
 
@@ -599,6 +578,7 @@ router.post('/boardSaveQuill', function (req, res, next) {
             brdtitle  : postData.brdtitle,
             brdmemo   : postData.brdmemo,
             brdwriter : postData.brdwriter,
+            brdType   : postData.brdType,
             brddate   : Date.now()
         };
 
