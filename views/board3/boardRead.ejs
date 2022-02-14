@@ -33,18 +33,22 @@
                 <tr>
                     <td>Image</td>
                     <td>   
-                        <%
-                            for(var i=0; i<fileRows.length; i++) {
-                        %>
-                        <div style="width: 45%; float: left;padding: 10pxs;margin: 10px;">
-                            <a href='download?filePath=images/<%=fileRows[i].fileUuid%>'>
-                                <div><img src="download?filePath=images/<%=fileRows[i].fileUuid%>" alt="<%=fileRows[i].fileNm%>" width="100%" ></div>
-                                <div><%=fileRows[i].fileNm%></div>
-                            </a>
-                        </div>    
-                        <%
-                            }
-                        %>
+                        <div neme="fileList" id="fileList">
+                            <%
+                                for(var i=0; i<fileRows.length; i++) {
+                            %>
+                            <div id="fileWrap_<%=fileRows[i].fileUuid%>" style="width: 45%; float: left;padding: 10pxs;margin: 10px;">
+                                <div style="font-size:12px; margin: 10px 0px;">
+                                    <span><%=fileRows[i].fileNm%></span>&nbsp;&nbsp;
+                                </div>
+                                <a href='download?filePath=images/<%=fileRows[i].fileUuid%>'>
+                                    <img src="download?filePath=images/<%=fileRows[i].fileUuid%>" width="100%"/>
+                                </a>
+                            </div> 
+                            <%
+                                }
+                            %>
+                        </div>
                     </td>
                 </tr>
             </tbody>

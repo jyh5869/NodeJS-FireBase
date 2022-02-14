@@ -47,7 +47,7 @@
                         <div id="fileWrap_<%=fileRows[i].fileUuid%>" style="width: 45%; float: left;padding: 10pxs;margin: 10px;">
                             <div style="font-size:12px; margin: 10px 0px;">
                                 <span><%=fileRows[i].fileNm%></span>&nbsp;&nbsp;
-                                <span onclick="javascript:fileDelete('<%=fileRows[i].fileUuid%>')" style="cursor: pointer;"> X </span>
+                                <span onclick="javascript:fileDeleteExist('<%=fileRows[i].fileUuid%>')" style="cursor: pointer;"> X </span>
                             </div>
                             <a href='download?filePath=images/<%=fileRows[i].fileUuid%>'>
                                 <img src="download?filePath=images/<%=fileRows[i].fileUuid%>" width="100%"/>
@@ -68,99 +68,108 @@
         <input type="hidden" name="brddate"      value="<%=row.brddate%>">
         <input type="hidden" name="brdType"      value="normal">
         <input type="hidden" name="fileDelArray" id="fileDelArray" value="">
-    </form>
-    <script>
-
-        $(document).ready(function() {
-            // input file 파일 첨부시 fileCheck 함수 실행
-            $("#attachFile").on("change", fileCheck);
-        });
-
-        // 파일 현재 필드 숫자 totalCount랑 비교값
-        var fileCount = 0;
-        // 해당 숫자를 수정하여 전체 업로드 갯수를 정한다.
-        var totalCount = 10;
-        // 파일 고유넘버
-        var fileNum = 0;
-        // 첨부파일 배열
-        var content_files = new Array();
-
-        function fileCheck(e) {
-            var files = e.target.files;
-            
-            // 파일 배열 담기
-            var filesArr = Array.prototype.slice.call(files);
-        
-            // 파일 개수 확인 및 제한
-            if (fileCount + filesArr.length > totalCount) {
-                $.alert('파일은 최대 '+totalCount+'개까지 업로드 할 수 있습니다.');
-                return;
-            } 
-            else {
-                fileCount = fileCount + filesArr.length;
-            }
-            
-            // 각각의 파일 배열담기 및 기타
-            filesArr.forEach(function (f) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    content_files.push(f);
-                    
-                    $('#fileList').append(
-                        '<div id="file' + fileNum + '" onclick="fileDelete(\'file' + fileNum + '\')">'
-                        + '<font style="font-size:12px">' + f.name + '</font>'  
-                        + '<img src="C:/service/aadfklnef.png" style="width:20px; height:auto; vertical-align: middle; cursor: pointer;"/>' 
-                        + '<div/>' 
-                    );
-                    fileNum ++;
-                };
-                reader.readAsDataURL(f);
-            });
-            console.log(content_files);
-            
-            //초기화 한다.
-            //$("#attachFile").val("");
-        }
-
-        // 파일 부분 삭제 함수
-        function fileDelete(fileNum){
-            var no = fileNum.replace(/[^0-9]/g, "");
-            content_files[no].is_delete = true;
-            $('#' + fileNum).remove();
-            fileCount --;
-            console.log(content_files);
-        }
-
-        //폼 값 전송
-        function regAction() {  
-
-            var form = $('#form1');
-
-            for (var x = 0; x < content_files.length; x++) {
-                // 삭제 안한것만 담아 준다. 
-                if(!content_files[x].is_delete){
-                    //form.append("attachFile", content_files[x]);
-                    //form.append("file"+x, content_files[x]);
-                    //form.append("<input type='file' name='file' value='"+content_files[x]+"' />");
-                    //form.innerHTML = formData.innerHTML + "<input type='file'  value='"+content_files[x]+"'/>";         
-                }               
-            } 
-            form.submit();
-        }
-
-        function fileDelete (deleteIdx){
-            
-            var fileDelArray = $('#fileDelArray').val();
-            
-            if(fileDelArray == ""){
-                $('#fileDelArray').val(deleteIdx);
-            }
-            else{
-                $('#fileDelArray').val(fileDelArray + "|" + deleteIdx);
-            }
-
-            $("#fileWrap_"+ deleteIdx).remove();
-        }
-    </script>  
+    </form>  
 </body>
+<script>
+
+    $(document).ready(function() {
+        // input file 파일 첨부시 fileCheck 함수 실행
+        $("#attachFile").on("change", fileCheck);
+    });
+
+    // 파일 현재 필드 숫자 totalCount랑 비교값
+    var fileCount = 0;
+    // 해당 숫자를 수정하여 전체 업로드 갯수를 정한다.
+    var totalCount = 10;
+    // 파일 고유넘버
+    var fileNum = 0;
+    // 첨부파일 배열
+    var content_files = new Array();
+
+    function fileCheck(e) {
+        var files = e.target.files;
+        
+        // 파일 배열 담기
+        var filesArr = Array.prototype.slice.call(files);
+    
+        // 파일 개수 확인 및 제한
+        if (fileCount + filesArr.length > totalCount) {
+            $.alert('파일은 최대 '+totalCount+'개까지 업로드 할 수 있습니다.');
+            return;
+        } 
+        else {
+            fileCount = fileCount + filesArr.length;
+        }
+        
+        // 각각의 파일 배열담기 및 기타
+        filesArr.forEach(function (f) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                content_files.push(f);
+
+                var imgStr = "";
+
+                imgStr += '<div id="fileWrap_' + fileNum + '"  style="width: 45%; float: left;padding: 10pxs;margin: 10px;">'
+                imgStr += '<div style="font-size:12px; margin: 10px 0px;">'
+                imgStr += '<span>'+ f.name +'</span>&nbsp;&nbsp;'
+                imgStr += '<span onclick="fileDeleteNew(\'' + fileNum + '\')" style="cursor: pointer;"> X </span>'
+                imgStr += '</div>'
+                imgStr += '<a href="javascript:void(0);">'    
+                imgStr += '<img src="'+e.target.result+'" width="100%" />'           
+                imgStr += '</a>'
+                imgStr += '</div>'   
+                
+                $('#fileList').append(imgStr);
+
+                fileNum ++;
+            };
+            reader.readAsDataURL(f);
+        });
+        console.log(content_files);
+        
+        //초기화 한다.
+        //$("#attachFile").val("");
+    }
+
+    // 파일 부분 삭제 함수 (새로운 첨부파일)
+    function fileDeleteNew(fileNum){
+        var no = fileNum.replace(/[^0-9]/g, "");
+        content_files[no].is_delete = true;
+        $('#fileWrap_' + fileNum).remove();
+        fileCount --;
+        console.log(content_files);
+    }
+
+    // 파일 부분 삭제 함수(기존 첨부파일)
+    function fileDeleteExist (deleteIdx){
+        
+        var fileDelArray = $('#fileDelArray').val();
+        
+        if(fileDelArray == ""){
+            $('#fileDelArray').val(deleteIdx);
+        }
+        else{
+            $('#fileDelArray').val(fileDelArray + "|" + deleteIdx);
+        }
+
+        $("#fileWrap_"+ deleteIdx).remove();
+    }
+
+    //폼 값 전송
+    function regAction() {  
+
+        var form = $('#form1');
+
+        for (var x = 0; x < content_files.length; x++) {
+            // 삭제 안한것만 담아 준다. 
+            if(!content_files[x].is_delete){
+                //form.append("attachFile", content_files[x]);
+                //form.append("file"+x, content_files[x]);
+                //form.append("<input type='file' name='file' value='"+content_files[x]+"' />");
+                //form.innerHTML = formData.innerHTML + "<input type='file'  value='"+content_files[x]+"'/>";         
+            }               
+        } 
+        form.submit();
+    }    
+</script>
 </html>

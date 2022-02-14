@@ -295,7 +295,7 @@ router.post('/boardSave', upload.any(), async function(req, res,next){
     
     var postData = req.body;
     var imgData = req.files;
-    console.log(imgData);
+
     /* 신규일경우 게시물 등록, 수정일 경우 게시물 수정 및 기존 첨부파일 삭제 */
     var boardDoc = db.collection("board").doc();
 
@@ -306,23 +306,38 @@ router.post('/boardSave', upload.any(), async function(req, res,next){
         boardDoc.set(postData);
     }
     else {//게시물 정보 수정 (update)
-        var doc = db.collection("board").doc(postData.brdno);
-        postData.brddate = parseInt(postData.brddate);
-        doc.update(postData);
+        var boardDoc = db.collection("board").doc(postData.brdno);
 
+        boardDoc.update({
+            brdno     : postData.brdno,
+            brdtitle  : postData.brdtitle,
+            brdmemo   : postData.brdmemo,
+            brdwriter : postData.brdwriter,
+        });
+        
         //첨부파일 전체 삭제(스토리지, 파일 데이터)
         const fileRef = db.collection('file').where('boardSq', '==', postData.brdno);
         const fileDoc = await fileRef.get();   
+        
+        //삭제될 파일 UUID 배열 리스트
+        var fileDelArray = postData.fileDelArray.split("|");
         
         fileDoc.forEach((doc) => {
             var fileData  = doc.data();
             var fileUuid  = fileData.fileUuid;
             var fileSq    = fileData.fileSq;
 
+            //삭제될 배열에 포함되지 않을 경우 Return
+            if(!fileDelArray.includes(fileUuid)){
+                return;
+            }
+
+            console.log("삭제된 파일 UUID : " + fileUuid);
+
             //스토리지에 업로드된 파일삭제
             friebaseAdmin.storage().bucket().file("images/"+fileUuid).delete()
             .then(function() {
-                console.log("Success");
+                console.log("Success delete File");
             })
             .catch(function(error) {
                 console.log("Fail----->" + error);
@@ -331,7 +346,7 @@ router.post('/boardSave', upload.any(), async function(req, res,next){
             //파일 데이터 삭제
             db.collection('file').doc(fileSq).delete()
             .then(function() {
-                console.log("Success");
+                console.log("Success delete Data");
             })
             .catch(function(error) {
                 console.log("Fail----->" + error);
