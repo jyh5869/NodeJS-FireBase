@@ -31,7 +31,13 @@
                 </tr>
                 <tr>
                     <td>Memo</td>
-                    <td><textarea name="brdmemo" rows="5" cols="60"><%=row.brdmemo%></textarea></td>
+                    <td><textarea name="brdmemo" rows="5" cols="60"><%=row.brdmemo%></textarea>
+                        <input type="hidden" name="brdno"        value="<%=row.brdno%>"     >
+                        <input type="hidden" name="brddate"      value="<%=row.brddate%>"   >
+                        <input type="hidden" name="brdType"      value="normal"             >
+                        <input type="hidden" name="fileDelArray" id="fileDelArray" value="" >
+                        <input type="hidden" name="fileInfo"     id="fileInfo"     value="" >
+                    </td>
                 </tr>
                 <tr>
                     <td>File</td>
@@ -64,10 +70,7 @@
         <a href="#" onclick="regAction();">Save</a>
         <a href="#" onclick="javascript:boardAction('boardDelete?brdno=<%=row.brdno%>','List');">List</a>
         
-        <input type="hidden" name="brdno"        value="<%=row.brdno%>">
-        <input type="hidden" name="brddate"      value="<%=row.brddate%>">
-        <input type="hidden" name="brdType"      value="normal">
-        <input type="hidden" name="fileDelArray" id="fileDelArray" value="">
+        
     </form>  
 </body>
 <script>
@@ -88,7 +91,6 @@
 
     function fileCheck(e) {
         var files = e.target.files;
-        
         // 파일 배열 담기
         var filesArr = Array.prototype.slice.call(files);
     
@@ -105,6 +107,15 @@
         filesArr.forEach(function (f) {
             var reader = new FileReader();
             reader.onload = function (e) {
+                
+                var fileInfo = f.name+ "," +f.type
+                if($("#fileInfo").val() == ""){
+                    $('#fileInfo').val(fileInfo);
+                }
+                else{
+                    $('#fileInfo').val($("#fileInfo").val() + "|" + fileInfo);
+                }
+
                 content_files.push(f);
 
                 var imgStr = "";
@@ -128,7 +139,7 @@
         console.log(content_files);
         
         //초기화 한다.
-        //$("#attachFile").val("");
+        $("#attachFile").val("");
     }
 
     // 파일 부분 삭제 함수 (새로운 첨부파일)
@@ -158,18 +169,49 @@
     //폼 값 전송
     function regAction() {  
 
-        var form = $('#form1');
+        var formData = new FormData();//form태그가 html에 없어야 생성가능  
+        $(formData).attr('accept-charset', 'UTF-8');
+
+        //formData.method = "get"; 
+        //formData.action = "boardSave"
+        //formData.enctype ='multipart/form-data';
+
+        formData.append("brdwriter"    , $("input[name=brdwriter]"    ).val());
+        formData.append("brdtitle"     , $("input[name=brdtitle]"     ).val());
+        formData.append("brdmemo"      , $("textarea[name=brdmemo]"   ).val());
+        formData.append("brdno"        , $("input[name=brdno]"        ).val());
+        formData.append("brddate"      , $("input[name=brddate]"      ).val());
+        formData.append("brdType"      , $("input[name=brdType]"      ).val());
+        formData.append("fileDelArray" , $("input[name=fileDelArray]" ).val());
+        formData.append("fileInfo"     , $("input[name=fileInfo]"     ).val());
 
         for (var x = 0; x < content_files.length; x++) {
             // 삭제 안한것만 담아 준다. 
             if(!content_files[x].is_delete){
-                //form.append("attachFile", content_files[x]);
-                //form.append("file"+x, content_files[x]);
-                //form.append("<input type='file' name='file' value='"+content_files[x]+"' />");
-                //form.innerHTML = formData.innerHTML + "<input type='file'  value='"+content_files[x]+"'/>";         
+                formData.append("file"+x, content_files[x]);
             }               
         } 
-        form.submit();
+        //formData.submit();
+
+        $.ajax({             
+            type: "POST",          
+            enctype: 'multipart/form-data',  
+            url: "boardSave",        
+            data: formData,          
+            processData: false,    
+            contentType: false,      
+            cache: false,           
+            timeout: 600000,       
+            success: function (data) { 
+                alert("complete");
+                location.href="boardList"      
+            },          
+            error: function (e) {  
+                console.log("ERROR : ", e);     
+                alert("fail");      
+            }     
+        });  
+
     }    
 </script>
 </html>

@@ -152,7 +152,6 @@ router.get('/boardList', async function(req, res, currentPage) {
                 currentPage = currentPage + 1 ;
                 console.log("existPage ----------> prev(다음페이지로)");
             }
-            
         }
     }
 
@@ -287,93 +286,145 @@ const { request } = require('http');
 
 const formidable = require('formidable')
 var fs = require('fs')
-
-router.post('/boardSave', upload.any(), async function(req, res,next){
+var filePath = "C:/service/"
+router.post('/boardSave', async function(req, res,next){
     
     chkidentify(res, 'loginForm');
     var user = firebase.auth().currentUser;
+    //console.log("☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆"+req.body);
     
-    var postData = req.body;
-    var imgData = req.files;
-
-    /* 신규일경우 게시물 등록, 수정일 경우 게시물 수정 및 기존 첨부파일 삭제 */
-    var boardDoc = db.collection("board").doc();
-
-    if (!postData.brdno) { //게시물 작성 (new)
-        postData.brddate = Date.now();
-        postData.brdno = boardDoc.id;
-        postData.brdwriter = user.email;
-        boardDoc.set(postData);
-    }
-    else {//게시물 정보 수정 (update)
-        var boardDoc = db.collection("board").doc(postData.brdno);
-
-        boardDoc.update({
-            brdno     : postData.brdno,
-            brdtitle  : postData.brdtitle,
-            brdmemo   : postData.brdmemo,
-            brdwriter : postData.brdwriter,
-        });
-        
-        //첨부파일 전체 삭제(스토리지, 파일 데이터)
-        const fileRef = db.collection('file').where('boardSq', '==', postData.brdno);
-        const fileDoc = await fileRef.get();   
-        
-        //삭제될 파일 UUID 배열 리스트
-        var fileDelArray = postData.fileDelArray.split("|");
-        
-        fileDoc.forEach((doc) => {
-            var fileData  = doc.data();
-            var fileUuid  = fileData.fileUuid;
-            var fileSq    = fileData.fileSq;
-
-            //삭제될 배열에 포함되지 않을 경우 Return
-            if(!fileDelArray.includes(fileUuid)){
-                return;
-            }
-
-            console.log("삭제된 파일 UUID : " + fileUuid);
-
-            //스토리지에 업로드된 파일삭제
-            friebaseAdmin.storage().bucket().file("images/"+fileUuid).delete()
-            .then(function() {
-                console.log("Success delete File");
-            })
-            .catch(function(error) {
-                console.log("Fail----->" + error);
-            });
-
-            //파일 데이터 삭제
-            db.collection('file').doc(fileSq).delete()
-            .then(function() {
-                console.log("Success delete Data");
-            })
-            .catch(function(error) {
-                console.log("Fail----->" + error);
-            });
-        });
-    }
 
     /* 파일 존재 여부 확인 후 파일 등록 s */    
-    if(imgData != null){
+    var form = new formidable.IncomingForm();
 
-        imgData.forEach(element => {
-            var image = element;
+    form.uploadDir = filePath 
+    form.keepExtension =true
+    form.multiples =true
+
+    fileCnt       = 0;
+    arrayPath     = [];
+    arraySaveName = [];
+    arrayRealName = [];
+    arrayMimetype = [];
+
+    form.on('fileBegin', function (name, file){
+        console.log(file)
+        var saveFileName   = uuid.v1();
+        var originFileName = file.originalFilename
+        arrayMimetype.push(file.mimetype);
+        //file.filepath = filePath + file.originalFilename;
+        file.filepath = filePath + saveFileName +"."+ originFileName.split(".")[1];
+        //console.log(originFileName.split(".")[1]);
+        arraySaveName.push(saveFileName);
+        arrayRealName.push(originFileName);
+        //console.log(file.filepath);
+    });
+
+    form.on('file', function (name, file){
+        
+        //console.log(file);
+        //console.log('Uploaded ' + file.originalFilename);
+
+        arrayPath.push(file.filepath);
+        
+        fileCnt++;
+        console.log("fileCNt---------------> "+fileCnt);
+    });
+    form.parse(req, async function(err, fields, files) {
+        console.log(fields);
+
+        var postData = fields;
+
+        /* 신규일경우 게시물 등록, 수정일 경우 게시물 수정 및 기존 첨부파일 삭제 */
+        var boardDoc = db.collection("board").doc();
+
+        if (!postData.brdno) { //게시물 작성 (new)
+
+            var postData = {
+                brdno     : boardDoc.id,
+                brdtitle  : postData.brdtitle,
+                brdmemo   : postData.brdmemo,
+                brdwriter : postData.brdwriter,
+                brdType   : postData.brdType,
+                brddate   : Date.now()
+            };
+    
+            boardDoc.set(postData);
+        }
+        else {//게시물 정보 수정 (update)
+            boardDoc = db.collection("board").doc(postData.brdno);
+            boardDoc.update({
+                brdno     : postData.brdno,
+                brdtitle  : postData.brdtitle,
+                brdmemo   : postData.brdmemo,
+                brdwriter : postData.brdwriter,
+            });
+            
+            //첨부파일 전체 삭제(스토리지, 파일 데이터)
+            const fileRef = db.collection('file').where('boardSq', '==', postData.brdno);
+            const fileDoc = await fileRef.get();   
+            
+            //삭제될 파일 UUID 배열 리스트
+            var fileDelArray = postData.fileDelArray.split("|");
+            
+            fileDoc.forEach((doc) => {
+                var fileData  = doc.data();
+                var fileUuid  = fileData.fileUuid;
+                var fileSq    = fileData.fileSq;
+
+                //삭제될 배열에 포함되지 않을 경우 Return
+                if(!fileDelArray.includes(fileUuid)){
+                    return;
+                }
+
+                console.log("삭제된 파일 UUID : " + fileUuid);
+
+                //스토리지에 업로드된 파일삭제
+                friebaseAdmin.storage().bucket().file("images/"+fileUuid).delete()
+                .then(function() {
+                    console.log("Success delete File");
+                })
+                .catch(function(error) {
+                    console.log("Fail----->" + error);
+                });
+
+                //파일 데이터 삭제
+                db.collection('file').doc(fileSq).delete()
+                .then(function() {
+                    console.log("Success delete Data");
+                })
+                .catch(function(error) {
+                    console.log("Fail----->" + error);
+                });
+            });
+        }
+
+        for (var i = 0; i < fileCnt; i++) {
+
+            var saveFilePath = arrayPath[i];
+            var saveFileName = arraySaveName[i];
+            var realFileName = arrayRealName[i];
+            var saveMimeType = arrayMimetype[i];
+            console.log(arrayMimetype);
+            var image = fs.readFileSync(saveFilePath, function(err, data){ });//버퍼로 가져옴
+            
             var bufferStream = new stream.PassThrough();
-            bufferStream.end(new Buffer.from(image.buffer, 'asci'));
-  
+            bufferStream.end(new Buffer.from(image, 'asci'));
+    
             /* 파일 업로드 */
-            var fileName = image.originalname;
-            var strUuid  = uuid.v1();
-            let file     = friebaseAdmin.storage().bucket().file("images/"+strUuid);
+            let file     = friebaseAdmin.storage().bucket().file( imgSavePath + saveFileName);
             bufferStream.pipe(file.createWriteStream({
                 metadata :{
-                    contentType : image.mimetype
+                    contentType : saveMimeType
                 }
             })).on('error', (err) => {
                 console.log(err);
             }).on("finish", () => {
-                console.log(fileName + "   finish!!");
+                
+                //임시경로 파일 삭제
+                fs.unlink(saveFilePath, err => {});
+                
+                console.log(saveFileName + "   finish!!");
             });
 
             /* 파일 데이터 저장 */
@@ -382,19 +433,18 @@ router.post('/boardSave', upload.any(), async function(req, res,next){
             var postDataFile = {
                 fileSq   : fileDoc.id,
                 boardSq  : boardDoc.id,
-                fileNm   : fileName,
-                fileUuid : strUuid,
+                fileNm   : realFileName,
+                fileUuid : saveFileName,
                 regDate  : Date.now()
             };
 
-            fileDoc.set(postDataFile);
-            });
-    }
+            fileDoc.set(postDataFile);   
+        }
+    });
     /* 파일 가져오기 e */
      
     res.redirect('boardList');
 });
-
 /* 게시물 삭제 */
 router.get('/boardDelete', async function(req, res, next){
     chkidentify(res, 'loginForm');
