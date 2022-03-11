@@ -484,7 +484,7 @@ router.get('/boardDelete', async function(req, res, next){
  
 /* 로그인 페이지로 이동 */
 router.get('/loginForm', function(req, res, next) {
-    res.render('board3/loginForm');
+    res.render('board3/loginForm',  { menuType : 'board'});
 });
 
 /* 로그인 Action*/

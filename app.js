@@ -49,7 +49,7 @@ app.use(function(err, req, res, next) {
   res.render("error", {
     message: err.message,
     error: {status: err.status, stack: err.stack}
- });
+});
   console.log( res.render('error'));
 });
 
@@ -88,7 +88,12 @@ firebaseHosting에서는 firebaseHosting폴더 하위의 functions 폴더에서 
 
 app.io = require('socket.io')();
 
+//socket 정보 저장
+let socketList = [];
+
 app.io.on('connection',(socket) => {
+
+  socketList.push(socket);
   console.log('유저가 들어왔다');
 
   socket.on('disconnect', () => {
