@@ -39,12 +39,60 @@ router.get('/chatting', async function(req, res, next) {
     }
 });
 
-router.get('/setChattingText', async function(req, res, next) {
+
+/*
+    채팅 이력 가져오기
+*/
+router.post('/getChtHistory', async function(req, res, next) {
+    db.collection('chatting').orderBy("regDate", "asc").get()//.startAt(last.data().brddate).limit(pagingSize).get()
+        .then((snapshot) => {
+            var rows = [];
+            snapshot.forEach((doc) => {
+                var childData = doc.data();
+                childData.regDate = dateFormat(childData.regDate,"yyyy-mm-dd");
+                //childData.receiveId = firebase.auth().doc(childData.receiveId).displayName;
+
+                rows.push(childData);
+            });
+            res.json({rows: rows, user: "하이하이"});
+            //res.json({rows: rows, user : user, currentPage : currentPage});
+        })
+        .catch((err) => {
+            console.log('Error getting documents', err);
+        });
+});
+
+const formidable = require('formidable')
+var fs = require('fs')
+var filePath = "C:/service/"
+router.post('/setChattingText', function(req, res, next) {
+
     chkidentify(res, 'loginFormForChatting');
 
-    var boardDoc = db.collection("chatting").doc();
+    var form = new formidable.IncomingForm();
 
-    //res.render('socket/chatting');
+    form.uploadDir = filePath 
+    form.keepExtension =true
+    form.multiples =true
+    
+    form.parse(req, function(err, fields, files) {
+        console.log(fields);
+
+        var postData = fields;
+        var chtDoc = db.collection("chatting").doc();
+
+        var postDataCht = {
+            textId    : chtDoc.id,
+            sendId    : postData.sender,
+            receiveId : postData.receiver,
+            message   : postData.message,
+            regDate   : Date.now()
+        };
+
+        chtDoc.set(postDataCht);     
+    });
+
+    res.json({userEmail: "userEmail", setUserName: "setUserName"});
 });
 
 /* 로그인 페이지로 이동 */
@@ -57,10 +105,11 @@ router.get('/loginFormForChatting', function(req, res, next) {
 router.post('/loginChk', function(req, res, next) {
     firebase.auth().signInWithEmailAndPassword(req.body.id, req.body.passwd)
         .then(function(firebaseUser) {
-
+            /* -- displayName 설정
             firebaseUser.user.updateProfile({
                 displayName: ""
             })
+            */
             res.redirect('chatting');
         })
         .catch(function(error) {
@@ -68,10 +117,9 @@ router.post('/loginChk', function(req, res, next) {
         });   
 });
 
-router.post('/setUserName',async function(req, res, next) {
+router.post('/setUserName', function(req, res, next) {
 
     chkidentify(res, 'loginFormForChatting');
-    console.log("★★★★★★★");
 
     var userEmail = req.query.userEmail;
     var setUserName = req.query.setName;
@@ -81,7 +129,7 @@ router.post('/setUserName',async function(req, res, next) {
     user.updateProfile({
         displayName: setUserName
     });
-    
+    res.json({userEmail: userEmail, setUserName: setUserName});
 });
 
 /* 로그인 여부 체크 */

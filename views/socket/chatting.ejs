@@ -6,17 +6,67 @@
         padding: 0;
         box-sizing: border-box;
     }
-
+    body {
+        background-color: bisque;
+    }
     #messages {
         list-style-type: none;
         margin: 0;
         padding: 0;
     }
-  
+
     #messages li {
+        width: 100%;
+        display: inline-block;
+    
+    }
+  
+    #messages li div.right {
         padding: 5px 10px;
+        float: right;
+    }
+    #messages li div.left {
+        padding: 5px 10px;
+        float: left;
     }
 
+    #messages li div.right > div:first-child {
+
+        background-color: lightsalmon;
+        font-weight: 300;
+        border-radius: 10px;
+        padding: 5px 10px;
+        margin : 5px 0px;
+        color: unset;
+    }
+
+    #messages li div.left > div:first-child {
+
+        padding: 5px;
+        margin : 5px 0px;
+    }
+
+    #messages li div.left > div:first-child span:last-child {
+
+        background-color: lightblue;
+        font-weight: 300;
+        border-radius: 10px;
+        padding: 5px 10px;
+        margin : 5px 0px;
+        color: unset;
+    }
+
+    #messages li div.left > div:nth-child(2) span {
+        display: block;
+        text-align: left;
+        font-size: 0.8em;
+    }
+
+    #messages li div > div:last-child span {
+        display: block;
+        text-align: right;
+        font-size: 0.7em;
+    }
     form {
         padding: 3px;
         position: fixed;
@@ -41,15 +91,15 @@
 </style>
 </head>
 <body>
+<input type="hid_den" id="userEmail" value="<%=userEmail%>" readonly>
+<input type="hid_den" id="userName"  value="<%=userName%>"  readonly>
+<button onclick="javascript:insertChgId();">이름 바꾸기</button>
 <ul id="messages"></ul>
 <form action="">
     <input id="m" autocomplete="off"/>
     <button>보내기</button>
 </form>
-<input type="hid_den" id="userEmail" value="<%=userEmail%>" >
-<input type="hid_den" id="userName"  value="<%=userName%>" >
-<input type="hid_den" id="changeName">
-<button onclick="javascript:setUserId($('#changeName').val())">이름 바꾸기</button>
+
 <script src="/socket.io/socket.io.js"></script>
 <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
@@ -65,25 +115,40 @@ $(() => {
         }
     }
     
+    getChtHistory();//채팅 리스트 가져오기
 
     const socket = io();
     $('form').submit(() => {
-        let msg = {name: name, messege:$('#m').val()} 
+        let msg = {userEmail: userEmail, messege:$('#m').val(), sender : "오은지"} 
         socket.emit('chat-msg', msg);
         $('#m').val('');
         return false;
     });
 
     socket.on('chat-msg', (msg) => {
-        $('#messages').append($('<li>').text(msg.name + '  :  ' +msg.messege));
+
+        var html = "";
+
+        html += '<li>';
+            html += '<div class="right">';
+                html += '<div>';    
+                    html += '<span>'+msg.messege+'</span>';    
+                html += '</div>';
+                html += '<div>';    
+                    html += '<span>'+dateFormat(Date.now(),"yyyy-mm-dd");+'</span>';    
+                html += '</div>';
+            html += '</div>';
+        html += '</li>';
+
+        $('#messages').append(html);
         
         //메시지 저장
         var formData = new FormData(); 
         $(formData).attr('accept-charset', 'UTF-8');
         
-        formData.append("sender"   ,  msg.sender  );
-        formData.append("receiver" ,  msg.sender  );
-        formData.append("message"  ,  msg.messege );
+        formData.append("sender"   ,  msg.userEmail);
+        formData.append("receiver" ,  msg.sender   );
+        formData.append("message"  ,  msg.messege  );
 
         $.ajax({             
             type: "POST",          
@@ -95,7 +160,6 @@ $(() => {
             cache: false,           
             timeout: 600000,       
             success: function (data) { 
-                alert("complete");
       
             },          
             error: function (e) {  
@@ -106,30 +170,107 @@ $(() => {
     });
 });
 
-function setUserId(setName){
+function getChtHistory(){
+    $.ajax({             
+        type: "POST",          
+        enctype: 'multipart/form-data',  
+        url: "getChtHistory",        
+        data: null,          
+        processData: false,    
+        contentType: false,      
+        cache: false,           
+        timeout: 600000,       
+        success: function (obj) {
 
-  var formData = new FormData();//form태그가 html에 없어야 생성가능  
-  $(formData).attr('accept-charset', 'UTF-8');
+            $(obj.rows).each(function(index, msg){
+                var message   = msg.message;
+                var receiveId = msg.receiveId;
+                var sendId    = msg.sendId;
+                var texId     = msg.textId;
+                var regDate   = msg.regDate;
 
-  formData.append("setName"    , setName);
-  formData.append("userEmail"  , userEmail);
+                var html = "";
+                var chtClass; //자기가 쓴 글일 경우와 아닐경우 UI 클래스 할당
 
-  $.ajax({             
-      type: "post",            
-      url: "setUserName?setName="+setName+"&userEmail="+userEmail,        
-      processData: false,    
-      contentType: false,      
-      cache: false,           
-      timeout: 600000,       
-      success: function (data) { 
-          alert("complete");
-          location.reload();
-      },          
-      error: function (e) {  
-          console.log("ERROR : ", e);     
-          alert("fail");      
-      }     
-  });
+                if(userEmail == sendId){
+                    chtClass = "right";
+
+                    html += '<li>';
+                        html += '<div class="'+chtClass+'">';
+                            html += '<div>';    
+                                html += '<span>'+message+'</span>';    
+                            html += '</div>';
+                            html += '<div>';    
+                                html += '<span>'+regDate+'</span>';    
+                            html += '</div>';
+                        html += '</div>';
+                    html += '</li>';
+                }
+                else{
+                    chtClass = "left";
+                    
+                    html += '<li>';
+                        html += '<div class="'+chtClass+'">';
+                            html += '<div>';    
+                                html += '<span>'+message+'</span>';    
+                            html += '</div>';
+                            html += '<div>';    
+                                html += '<span>'+sendId+'</span>'; 
+                            html += '</div>';
+                            html += '<div>';    
+                                html += '<span>'+regDate+'</span>';    
+                            html += '</div>';
+                        html += '</div>';
+                    html += '</li>';
+                }
+
+
+                
+                $('#messages').append(html);
+                
+            })
+        },          
+        error: function (e) {  
+            console.log("ERROR : ", e);     
+            alert("fail");      
+        }     
+    });  
+}
+function insertChgId(){
+    const name = prompt('변경하실 사용자 명을 입력해 주세요.');
+
+    if(name == null || name == ""){
+        alert('올바른 형식의 사용자 명을 입력해 주세요');
+        return false;
+    }
+    else {
+        setUserId(name);
+    }
+}
+function setUserId(name){
+
+    var formData = new FormData();//form태그가 html에 없어야 생성가능  
+    $(formData).attr('accept-charset', 'UTF-8');
+
+    formData.append("setName"    , name);
+    formData.append("userEmail"  , userEmail);
+
+    $.ajax({             
+        type: "post",            
+        url: "setUserName?setName="+name+"&userEmail="+userEmail,        
+        processData: false,    
+        contentType: false,      
+        cache: false,           
+        timeout: 600000,       
+        success: function (data) { 
+            alert("complete");
+            location.reload();
+        },          
+        error: function (e) {  
+            console.log("ERROR : ", e);     
+            alert("fail");      
+        }     
+    });
 }
 </script>
 </body>
