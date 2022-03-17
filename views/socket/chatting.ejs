@@ -1,5 +1,9 @@
+<!DOCTYPE html>
 <html>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>chatting sample for firebase (Firestore Database)</title>
+
 <style>
     * {
         margin: 0;
@@ -25,6 +29,7 @@
         padding: 5px 10px;
         float: right;
     }
+
     #messages li div.left {
         padding: 5px 10px;
         float: left;
@@ -42,7 +47,7 @@
 
     #messages li div.left > div:first-child {
 
-        padding: 5px;
+        padding: 5px 0px;
         margin : 5px 0px;
     }
 
@@ -62,7 +67,12 @@
         font-size: 0.8em;
     }
 
-    #messages li div > div:last-child span {
+    #messages li div.left > div:last-child span {
+        display: block;
+        text-align: left;
+        font-size: 0.7em;
+    }
+    #messages li div.right > div:last-child span {
         display: block;
         text-align: right;
         font-size: 0.7em;
@@ -89,25 +99,30 @@
         padding: 10px;
     }
 </style>
+
+    <%- include ("./common/include") %>
 </head>
 <body>
-<input type="hid_den" id="userEmail" value="<%=userEmail%>" readonly>
-<input type="hid_den" id="userName"  value="<%=userName%>"  readonly>
-<button onclick="javascript:insertChgId();">이름 바꾸기</button>
-<ul id="messages"></ul>
-<form action="">
-    <input id="m" autocomplete="off"/>
-    <button>보내기</button>
-</form>
+
+    <input type="hid_den" id="userEmail" value="<%=userEmail%>" readonly>
+    <input type="hid_den" id="userName"  value="<%=userName%>"  readonly>
+    <button onclick="javascript:insertChgId();">이름 바꾸기</button>
+    <ul id="messages"></ul>
+    <form action="">
+        <input id="m" autocomplete="off"/>
+        <button>보내기</button>
+    </form>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
+
 var userName  = document.getElementById("userName").value;
 var userEmail = document.getElementById("userEmail").value;
 
 $(() => {
     
+    //사용자 유효성 확인
     if(userName == null || userName == ""){
         const name = prompt('사용자 이름/별명 등록되어 있지 않은 사용자입니다.\n 이름/별명을 입력해주세요');
         if(name != null && name != ""){
@@ -117,6 +132,7 @@ $(() => {
     
     getChtHistory();//채팅 리스트 가져오기
 
+    //보내기 버튼 클릭시
     const socket = io();
     $('form').submit(() => {
         let msg = {userEmail: userEmail, messege:$('#m').val(), sender : "오은지"} 
@@ -126,9 +142,9 @@ $(() => {
     });
 
     socket.on('chat-msg', (msg) => {
-
+        //입력 메세지 채팅창에 추가하기 
         var html = "";
-
+        
         html += '<li>';
             html += '<div class="right">';
                 html += '<div>';    
@@ -142,7 +158,7 @@ $(() => {
 
         $('#messages').append(html);
         
-        //메시지 저장
+        //입력 메시지 저장
         var formData = new FormData(); 
         $(formData).attr('accept-charset', 'UTF-8');
         
@@ -170,6 +186,10 @@ $(() => {
     });
 });
 
+
+/*
+    채팅 이력 세팅
+*/
 function getChtHistory(){
     $.ajax({             
         type: "POST",          
@@ -184,10 +204,11 @@ function getChtHistory(){
 
             $(obj.rows).each(function(index, msg){
                 var message   = msg.message;
-                var receiveId = msg.receiveId;
+                var receiveId = msg.receiveId.split("|")[0];
                 var sendId    = msg.sendId;
                 var texId     = msg.textId;
                 var regDate   = msg.regDate;
+                var nickName  = msg.receiveId.split("|")[1];
 
                 var html = "";
                 var chtClass; //자기가 쓴 글일 경우와 아닐경우 UI 클래스 할당
@@ -198,7 +219,7 @@ function getChtHistory(){
                     html += '<li>';
                         html += '<div class="'+chtClass+'">';
                             html += '<div>';    
-                                html += '<span>'+message+'</span>';    
+                                html += '<span>'+message+'</span>';  
                             html += '</div>';
                             html += '<div>';    
                                 html += '<span>'+regDate+'</span>';    
@@ -215,7 +236,7 @@ function getChtHistory(){
                                 html += '<span>'+message+'</span>';    
                             html += '</div>';
                             html += '<div>';    
-                                html += '<span>'+sendId+'</span>'; 
+                                html += '<span title="사용자ID : '+sendId+'">'+nickName+'</span>'; 
                             html += '</div>';
                             html += '<div>';    
                                 html += '<span>'+regDate+'</span>';    
@@ -224,10 +245,7 @@ function getChtHistory(){
                     html += '</li>';
                 }
 
-
-                
                 $('#messages').append(html);
-                
             })
         },          
         error: function (e) {  
@@ -236,6 +254,11 @@ function getChtHistory(){
         }     
     });  
 }
+
+
+/*
+    변경될 닉네임 입력 창 호출
+*/
 function insertChgId(){
     const name = prompt('변경하실 사용자 명을 입력해 주세요.');
 
@@ -247,6 +270,11 @@ function insertChgId(){
         setUserId(name);
     }
 }
+
+/*
+    입력 받은 값으로 유저 닉네임 변경
+    1. name : 닉네임 
+*/
 function setUserId(name){
 
     var formData = new FormData();//form태그가 html에 없어야 생성가능  

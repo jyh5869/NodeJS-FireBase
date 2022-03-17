@@ -5,27 +5,29 @@
 <title>board sample for firebase (Auth)</title>
 <%- include ("./common/include") %>
 </head>
-<body> 
-    <form name="form1" action="loginChk" method="post">
-        <table border="1" style="width:600px">
-            <caption>board sample for firebase (Auth)</caption>
-            <colgroup>
-                <col width='15%' />
-                <col width='*%' />
-            </colgroup>
-            <tbody>
-                <tr>
-                    <td>ID</td>
-                    <td><input type="text" name="id" size="20" maxlength="20"></td>
-                </tr>
-                <tr>
-                    <td>Password</td>
-                    <td><input type="password" name="passwd" size="20" maxlength="20"></td>
-                </tr>
-            </tbody>
-        </table>
-        <input type="hid_den" value="<%=menuType%>">
-        <a href="#" onclick="form1.submit()">Login</a>
-    </form>   
+<body>
+    <div>
+        <form name="form1" action="loginChk" method="post">
+            <table border="1" style="width:600px">
+                <caption>board sample for firebase (Auth)</caption>
+                <colgroup>
+                    <col width='15%' />
+                    <col width='*%' />
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td>ID</td>
+                        <td><input type="text" name="id" size="20" maxlength="20"></td>
+                    </tr>
+                    <tr>
+                        <td>Password</td>
+                        <td><input type="password" name="passwd" size="20" maxlength="20"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <input type="hidden" value="<%=menuType%>">
+            <a href="#" onclick="form1.submit()">Login</a>
+        </form>  
+    </div> 
 </body>
 </html>
