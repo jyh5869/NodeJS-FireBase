@@ -3,30 +3,34 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>board sample for firebase (Auth)</title>
-<%- include ("./common/include") %>
+<%- include ("../common/include") %>
 </head>
 <body>
-    <div>
+    <div class="loginWrap">
         <form name="form1" action="loginChk" method="post">
-            <table border="1" style="width:600px">
-                <caption>board sample for firebase (Auth)</caption>
+            <table border="1" class="table">
+                <caption>다이어리</caption>
                 <colgroup>
                     <col width='15%' />
                     <col width='*%' />
                 </colgroup>
                 <tbody>
                     <tr>
-                        <td>ID</td>
+                        <td class="text-center">아이디</td>
                         <td><input type="text" name="id" size="20" maxlength="20"></td>
                     </tr>
                     <tr>
-                        <td>Password</td>
+                        <td class="text-center" >비밀번호</td>
                         <td><input type="password" name="passwd" size="20" maxlength="20"></td>
                     </tr>
                 </tbody>
             </table>
             <input type="hidden" value="<%=menuType%>">
-            <a href="#" onclick="form1.submit()">Login</a>
+            <div class="btnWrap loginWwrap">
+                <div>
+                    <a class="but_02" href="#" onclick="form1.submit()">Login</a>
+                </div>    
+            </div>
         </form>  
     </div> 
 </body>

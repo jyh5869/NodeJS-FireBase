@@ -56,7 +56,15 @@ router.post('/getChtHistory', async function(req, res, next) {
         rows.push(childData);
     });
 
-    //채팅 히스토리와 유저의 닉네임 매칭(유저 컬렉션 사용)
+    /*
+        채팅 히스토리와 유저의 닉네임 매칭(유저 컬렉션 사용)
+        
+        ※ for문 대신 foreach를 쓰게 되면 
+        1. foreach를 횟수만큼 호출만 하면 역할을 다함( 호출후 처리 안함 )
+        2. foreach는 병렬 처리 반복문이므로 반복문 이후 다른작업이 있다면 반복문을 병렬처리(닉네임 매칭)하면서 다음 작업(response)을 동시에 진행
+        3. 아래 소스에서는 닉네임을 매칭하는 병렬처리 도중 response가 되므로 실제 응답값에서 닉네임 매칭부분이 누락 됨.
+        4. 그러므로 for문(순차 실행) 을 이용하여 순차적으로 실행 되도록 수정하였음.
+    */
     for(var i = 0 ; i < rows.length; i++ ){
        
         const userRef = db.collection('userInfo').where('userEmail', '==', rows[i].sendId);

@@ -25,6 +25,19 @@ function boardAction(url, state){
 
 }
 
+/* 현재 날짜 반환 함수 */
+function setCurrentTime(indexString){
+    
+    let ts = Date.now();
+
+    let date_ob = new Date(ts);
+    let date = date_ob.getDate();
+    let month = date_ob.getMonth() + 1;
+    let year = date_ob.getFullYear();
+    
+    return year + indexString + month + indexString + date
+}
+
 
 /* 엔티티 문자 변환 함수 ex) &lt; -> '<' */
 function decodeHTMLEntities (str) {

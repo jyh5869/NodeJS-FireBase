@@ -347,7 +347,7 @@ router.post('/boardSave', async function(req, res,next){
                 brdwriter : postData.brdwriter,
                 brdType   : postData.brdType,
                 brddate   : Date.now()
-            };
+            };forEach
     
             boardDoc.set(postData);
         }

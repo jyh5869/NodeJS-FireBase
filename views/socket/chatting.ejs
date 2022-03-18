@@ -3,118 +3,31 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>chatting sample for firebase (Firestore Database)</title>
+<%- include ("../common/include") %>
 
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    body {
-        background-color: bisque;
-    }
-    #messages {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    #messages li {
-        width: 100%;
-        display: inline-block;
-    
-    }
-  
-    #messages li div.right {
-        padding: 5px 10px;
-        float: right;
-    }
-
-    #messages li div.left {
-        padding: 5px 10px;
-        float: left;
-    }
-
-    #messages li div.right > div:first-child {
-
-        background-color: lightsalmon;
-        font-weight: 300;
-        border-radius: 10px;
-        padding: 5px 10px;
-        margin : 5px 0px;
-        color: unset;
-    }
-
-    #messages li div.left > div:first-child {
-
-        padding: 5px 0px;
-        margin : 5px 0px;
-    }
-
-    #messages li div.left > div:first-child span:last-child {
-
-        background-color: lightblue;
-        font-weight: 300;
-        border-radius: 10px;
-        padding: 5px 10px;
-        margin : 5px 0px;
-        color: unset;
-    }
-
-    #messages li div.left > div:nth-child(2) span {
-        display: block;
-        text-align: left;
-        font-size: 0.8em;
-    }
-
-    #messages li div.left > div:last-child span {
-        display: block;
-        text-align: left;
-        font-size: 0.7em;
-    }
-    #messages li div.right > div:last-child span {
-        display: block;
-        text-align: right;
-        font-size: 0.7em;
-    }
-    form {
-        padding: 3px;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-    }
-
-    form input {
-        border: 1px solid black;
-        padding: 10px;
-        width: 90%;
-        margin-right: .5%;
-    }
-
-    form button {
-        width: 9%;
-        background: skyblue;
-        color: white;
-        border: none;
-        padding: 10px;
-    }
-</style>
-
-    <%- include ("./common/include") %>
 </head>
 <body>
+    <!--상단 컨테이너 시작-->
+    <%- include ("../common/header") %>
+    <!--상단 컨테이너 끝-->
+    <div id="chtWrap">
+        
+        <div class="btnWrap">
+            <div>
+                <span id="nickName">닉네임 : <span><%=userName%></span></span>
+                <button class="but_01" onclick="javascript:insertChgId();">이름 바꾸기</button>
+            </div>
+        </div>
+        <ul id="messages"></ul>
 
-    <input type="hid_den" id="userEmail" value="<%=userEmail%>" readonly>
-    <input type="hid_den" id="userName"  value="<%=userName%>"  readonly>
-    <button onclick="javascript:insertChgId();">이름 바꾸기</button>
-    <ul id="messages"></ul>
-    <form action="">
-        <input id="m" autocomplete="off"/>
-        <button>보내기</button>
-    </form>
-
+        <form action="" class="cht">
+            <input id="m" autocomplete="off"/>
+            <button>보내기</button>
+            <input type="hidden" id="userEmail" value="<%=userEmail%>" readonly>
+            <input type="hidden" id="userName"  value="<%=userName%>"  readonly>
+        </form>
+    </div>
 <script src="/socket.io/socket.io.js"></script>
-<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
 
 var userName  = document.getElementById("userName").value;
@@ -150,8 +63,8 @@ $(() => {
                 html += '<div>';    
                     html += '<span>'+msg.messege+'</span>';    
                 html += '</div>';
-                html += '<div>';    
-                    html += '<span>'+dateFormat(Date.now(),"yyyy-mm-dd");+'</span>';    
+                html += '<div>';/* 날짜 포멧으로 가져오는 js 만들기 */
+                    html += '<span>'+setCurrentTime("-");+'</span>';    
                 html += '</div>';
             html += '</div>';
         html += '</li>';
@@ -185,7 +98,6 @@ $(() => {
         });  
     });
 });
-
 
 /*
     채팅 이력 세팅
@@ -254,7 +166,6 @@ function getChtHistory(){
         }     
     });  
 }
-
 
 /*
     변경될 닉네임 입력 창 호출

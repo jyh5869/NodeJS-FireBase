@@ -1,7 +1,97 @@
-#main {
-  margin: auto;
-  margin-top: 100px;
-  background-color: lightblue;
-  text-align: center;
-  width: 200px;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+
+body {
+    background-color: bisque;
+}
+
+#messages {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#messages li {
+    width: 100%;
+    display: inline-block;
+}
+
+#messages li div.right {
+    padding: 5px 10px;
+    float: right;
+}
+
+#messages li div.left {
+    padding: 5px 10px;
+    float: left;
+}
+
+#messages li div.right > div:first-child {
+    background-color: lightsalmon;
+    font-weight: 300;
+    border-radius: 10px;
+    padding: 5px 10px;
+    margin : 5px 0px;
+    color: unset;
+}
+
+#messages li div.left > div:first-child {
+    padding: 5px 0px;
+    margin : 5px 0px;
+}
+
+#messages li div.left > div:first-child span:last-child {
+    background-color: lightblue;
+    font-weight: 300;
+    border-radius: 10px;
+    padding: 5px 10px;
+    margin : 5px 0px;
+    color: unset;
+}
+
+#messages li div.left > div:nth-child(2) span {
+    display: block;
+    text-align: left;
+    font-size: 0.8em;
+    padding-bottom: 3px;
+}
+
+#messages li div.left > div:last-child span {
+    display: block;
+    text-align: left;
+    font-size: 0.7em;
+}
+
+#messages li div.right > div:last-child span {
+    display: block;
+    text-align: right;
+    font-size: 0.7em;
+}
+
+form.cht {
+    padding: 20px 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+form input {
+    border: 1px solid black;
+    padding: 10px;
+    width: 85%;
+    margin-right: .5%;
+}
+
+form button {
+    width: 13.5%;
+    background: skyblue;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+
