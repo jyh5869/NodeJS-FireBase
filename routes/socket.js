@@ -35,7 +35,7 @@ router.get('/chatting', async function(req, res, next) {
     }
     else {
         console.log(user.displayName);
-        res.render('socket/chatting' ,  { userEmail : user.email, userName : user.displayName} );
+        res.render('socket/chatting' ,  { user : user} );
     }
 });
 

@@ -196,7 +196,7 @@ router.get('/boardRead', async function(req, res, next) {
                 fileRows.push(fileData);    
     });
 
-    res.render('board3/boardRead', {row : boardData, userEmail : user.email, fileRows : fileRows});       
+    res.render('board3/boardRead', {row : boardData, user : user, fileRows : fileRows});       
 });
  
 /* 게시물 작성 or 수정 페이지로 이동 */
@@ -213,7 +213,7 @@ router.get('/boardForm',async function(req, res,next){
                 row       : "",
                 fileRows  : "",
                 boardType : boardType,
-                userEmail : user.email
+                user      : user
             });
         }
         else{//Quill 에디터 글 작성하기
@@ -222,7 +222,7 @@ router.get('/boardForm',async function(req, res,next){
             row       : "",
             fileRows  : "",
             boardType : boardType,
-            userEmail : user.email
+            user      : user
         });
         }
 
@@ -250,7 +250,7 @@ router.get('/boardForm',async function(req, res,next){
                     fileRows.push(fileData);    
         });
 
-        res.render('board3/boardForm', {row : boardData, userEmail : user.email, fileRows : fileRows});
+        res.render('board3/boardForm', {row : boardData, user : user, fileRows : fileRows});
     }
     else {//Quill 에디터 글 업데이트
 
@@ -261,7 +261,7 @@ router.get('/boardForm',async function(req, res,next){
                 res.render('board3/boardFormQuill', {//1. Quill 에디터를 이용한 글 쓰기
                 //res.render('board3/boardForm', { //2. 단순 다중 파일첨부 글쓰기
                     row: childData,
-                    userEmail : user.email
+                    user : user
             });
         })
     }
@@ -554,7 +554,7 @@ router.get('/boardReadQuill', function (req, res, next) {
 
             function callback() {
                 childData.brddate = dateFormat(childData.brddate, "yyyy-mm-dd TT hh:mm:ss");
-                res.render('board3/boardFormQuill', { row: childData, userEmail : user.email });
+                res.render('board3/boardFormQuill', { row: childData, user : user });
             }
 
             var imgCount = 0;

@@ -9,65 +9,65 @@
 </head>
 <body> 
         <!--상단 컨테이너 시작-->
-        <%- include ("../common/header") %>
+        <%- include ("../common/header" , {menuType: "diary"}) %>
         <!--상단 컨테이너 끝-->
-        <table border="1" style="width:600px">
-            <caption>일기장</caption>
-            <colgroup>
-                <col width='15%' />
-                <col width='*%' />
-            </colgroup>
-            <tbody>
-                <tr>
-                    <td>Writer</td>
-                    <td><%=row.brdwriter%></td>
-                </tr>
-                <tr>
-                    <td>Title</td>
-                    <td><%=row.brdtitle%></td>
-                </tr>
-                <tr>
-                    <td>Memo</td>
-                    <td><%=row.brdmemo%></td>
-                </tr>       
-                <tr>
-                    <td>Image</td>
-                    <td>   
-                        <div neme="fileList" id="fileList">
-                            <%
-                                for(var i=0; i<fileRows.length; i++) {
-                            %>
-                            <div id="fileWrap_<%=fileRows[i].fileUuid%>" style="width: 45%; float: left;padding: 10pxs;margin: 10px;">
-                                <div style="font-size:12px; margin: 10px 0px;">
-                                    <span><%=fileRows[i].fileNm%></span>&nbsp;&nbsp;
-                                </div>
-                                <a href='download?filePath=images/<%=fileRows[i].fileUuid%>'>
-                                    <img src="download?filePath=images/<%=fileRows[i].fileUuid%>" width="100%"/>
-                                </a>
-                            </div> 
-                            <%
-                                }
-                            %>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>   
-        <a href="#" onclick="history.back(-1)">List</a>
-        
-        <%
-            if(row.brdwriter == userEmail){
-        %>
-            <!--
-            <a href="boardDelete?brdno=<%=row.brdno%>">Delete</a>
-            <a href="boardForm?brdno=<%=row.brdno%>">Modify</a>
-            -->
-            <a href="javascript:boardAction('boardDelete?boardType=normal&brdno=<%=row.brdno%>','Delete');">Delete</a>
-            <a href="javascript:boardAction('boardForm?boardType=normal&brdno=<%=row.brdno%>','Modify')">Modify</a>
-        <%
-            }
-        %>
-
+        <div class="title">일기장</div>
+        <div class="tableWrap">
+            <table border="1" class="table">
+                <caption>일기장</caption>
+                <colgroup>
+                    <col width='15%' />
+                    <col width='*%' />
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td>Writer</td>
+                        <td><%=row.brdwriter%></td>
+                    </tr>
+                    <tr>
+                        <td>Title</td>
+                        <td><%=row.brdtitle%></td>
+                    </tr>
+                    <tr>
+                        <td>Memo</td>
+                        <td><%=row.brdmemo%></td>
+                    </tr>       
+                    <tr>
+                        <td>Image</td>
+                        <td>   
+                            <div neme="fileList" id="fileList">
+                                <%
+                                    for(var i=0; i<fileRows.length; i++) {
+                                %>
+                                <div id="fileWrap_<%=fileRows[i].fileUuid%>" style="width: 45%; float: left;padding: 10pxs;margin: 10px;">
+                                    <div style="font-size:12px; margin: 10px 0px;">
+                                        <span><%=fileRows[i].fileNm%></span>&nbsp;&nbsp;
+                                    </div>
+                                    <a href='download?filePath=images/<%=fileRows[i].fileUuid%>'>
+                                        <img src="download?filePath=images/<%=fileRows[i].fileUuid%>" width="100%"/>
+                                    </a>
+                                </div> 
+                                <%
+                                    }
+                                %>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="pagingWrap">
+            <a href="#" onclick="history.back(-1)">List</a>
+            
+            <%
+                if(row.brdwriter == user.email){
+            %>
+                <a href="javascript:boardAction('boardDelete?boardType=normal&brdno=<%=row.brdno%>','Delete');">Delete</a>
+                <a href="javascript:boardAction('boardForm?boardType=normal&brdno=<%=row.brdno%>','Modify')">Modify</a>
+            <%
+                }
+            %>
+        </div>
         
 
        

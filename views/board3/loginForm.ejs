@@ -3,10 +3,11 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>board sample for firebase (Auth)</title>
-<%- include ("../common/include") %>
+<%- include ("../common/include" , {menuType: "login"}) %>
 </head>
 <body>
     <div class="loginWrap">
+        <div class="title">다이어리</div>
         <form name="form1" action="loginChk" method="post">
             <table border="1" class="table">
                 <caption>다이어리</caption>

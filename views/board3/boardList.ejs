@@ -9,57 +9,60 @@
 </head>
 <body> 
     <!--상단 컨테이너 시작-->
-    <%- include ("../common/header") %>
+    <%- include ("../common/header" , {menuType: "diary"}) %>
     <!--상단 컨테이너 끝-->
     <br>
     <div class="btnWrap" >
         <div><a href="boardForm?boardType=normal"> ♤ 그림 일기 쓰기 ♤ </a></div>
         <div><a href="boardForm?boardType=editor"> ♤ 파일 첨부 일기 쓰기 ♤ </a></div>
-    </div>    
-    <table border="1" class="table">
-        <caption>일기장</caption>
-        <colgroup>
-            <col width='8%' />
-            <col width='*%' />
-            <col width='15%' />
-            <col width='10%' />
-            <col width='15%' />
-        </colgroup>
-        <thead>
-            <tr>
-                <th>No.</th>
-                <th>Title</th>
-                <th>Writer</th>
-                <th>Type</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-        <tbody>
-        <%
-             for(var i=0; i<rows.length; i++) {
-        %>
-            <tr>
-                <td class="text-center"><%=rows.length-i%></td>
-                <%
-                    if(rows[i].brdType == "normal"){
-                %>
-                    <td><a href='boardRead?boardType=normal&brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a></td><!-- 일만 파일 업로드 게시판 -->
-                <%
-                    } else {
-                %>
-                    <td><a href='boardReadQuill?brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a></td> <!-- 에디터를 사용한 파일 업로드 게시판-->
-                <%
-                    }
-                %>  
-                <td class="text-center"><%=rows[i].brdwriter%></td>
-                <td class="text-center"><%=rows[i].brdType%></td>
-                <td class="text-center"><%=rows[i].brddate%></td>
-            </tr>
-        <%
-             }
-        %>
-        </tbody>
-    </table>
+    </div>
+    <div class="title">일기장</div>
+    <div class="tableWrap">
+        <table border="1" class="table">
+            <caption>일기장</caption>
+            <colgroup>
+                <col width='8%' />
+                <col width='*%' />
+                <col width='15%' />
+                <col width='10%' />
+                <col width='15%' />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Title</th>
+                    <th>Writer</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            <%
+                for(var i=0; i<rows.length; i++) {
+            %>
+                <tr>
+                    <td class="text-center"><%=rows.length-i%></td>
+                    <%
+                        if(rows[i].brdType == "normal"){
+                    %>
+                        <td><a href='boardRead?boardType=normal&brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a></td><!-- 일만 파일 업로드 게시판 -->
+                    <%
+                        } else {
+                    %>
+                        <td><a href='boardReadQuill?brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a></td> <!-- 에디터를 사용한 파일 업로드 게시판-->
+                    <%
+                        }
+                    %>  
+                    <td class="text-center"><%=rows[i].brdwriter%></td>
+                    <td class="text-center"><%=rows[i].brdType%></td>
+                    <td class="text-center"><%=rows[i].brddate%></td>
+                </tr>
+            <%
+                }
+            %>
+            </tbody>
+        </table>
+    </div>
     <div class="pagingWrap">
         <a href="boardList?type=first">First</a>&nbsp;&nbsp;
         <a href="boardList?type=prev&currentPage=<%=currentPage%>">Prev</a>&nbsp;&nbsp;

@@ -28,8 +28,11 @@ app.use('/users', usersRouter);
 
 //app.use('/board1', require('./routes/board1'));
 //app.use('/board2', require('./routes/board2'));
-app.use('/board3', require('./routes/board3'));
-app.use('/socket', require('./routes/socket'));
+
+//app.use('/board3', require('./routes/board3'));
+//app.use('/socket', require('./routes/socket'));
+app.use('/', require('./routes/board3'));
+app.use('/', require('./routes/socket'));
 //app.use('/common', require('./routes/common'));
 
 // catch 404 and forward to error handler

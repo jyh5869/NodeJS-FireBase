@@ -1,12 +1,26 @@
-
 <div class="header">
     <div class="wrap"> 
         <a href="chatting">대화하기</a>
         <a href="boardList">일기쓰기</a>
         <a href="logoutAction">로그아웃</a>
     </div>
+    <%
+        if(menuType == "cht") {
+    %>
+        <div class="btnWrap">
+            <div>
+                <span id="nickName">닉네임 : <span><%=user.displayName%></span></span>
+                <button class="but_01" onclick="javascript:insertChgId();">이름 바꾸기</button>
+            </div>
+        </div>
+    <%
+    } else if(menuType == "diary") {
+    %>
+        <div class="userInfoWrap">
+            나는 <%=user.email%>( <%=user.displayName%> )
+        </div>
+    <%
+    }
+    %> 
 </div>
 
-<script>
-
-</script>

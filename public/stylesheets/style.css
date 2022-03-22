@@ -22,9 +22,14 @@ table tr, td{
 }
 
 table caption{
+    display: none;
+}
+
+div.title{
     padding: 20px;
     font-size: 30px;
     color: coral;
+    text-align: center;
 }
 
 table .text-center {
@@ -35,9 +40,15 @@ table .text-left {
     text-align: left;
 }
 
-table input {
-  width: 95%;
-  margin: 5px 10px;
+table input, table textarea {
+    width: 100%;
+    margin: 5px 0px;
+    border: solid 1px gray;
+}
+
+div.tableWrap{
+    padding:0 0;
+    
 }
 
 .loginTable{
@@ -48,6 +59,12 @@ table input {
     margin: 0 auto;
     width: fit-content;
     padding: 20px 10px;
+}
+
+.header .userInfoWrap{
+    text-align: center;
+    color:mediumseagreen;
+    font-size: 0.8em;
 }
 
 .header .wrap a{
@@ -87,6 +104,9 @@ table input {
     margin: 20px;
 }
 
+.btnWrap.loginWwrap a:hover{
+    border-radius: 0px;
+}
 
 .btnWrap div{
     margin: 0 auto;
@@ -94,12 +114,19 @@ table input {
 }
 
 
-.btnWrap div a{
+.btnWrap a{
     margin: 0 auto;
     width: fit-content;
     text-decoration-line : none;
-    margin-bottom: 7px;
+    margin-bottom: 5px;
     display: block;
+    padding: 5px 10px;
+}
+
+.btnWrap a:hover{
+    background: skyblue;
+    color: white;
+    border-radius: 15px;
 }
 
 .btnWrap div #nickName{
@@ -109,19 +136,43 @@ table input {
 }
 
 .loginWrap{
-    margin-top: 25%;
+    margin-top: 150px;
 }
-
 
 .pagingWrap{
     margin: 0 auto;
     width: fit-content;
     padding: 25px;
+    
+}
+
+.pagingWrap a{
+    text-decoration: none;
+    padding: 5px 5px;
+}
+
+.pagingWrap a:hover{
+    font-size: 1.1em;
+    background: skyblue;
+    color: white;
+    border-radius: 25px;
+    
+}
+
+table.table {
+    min-width: 600px;
+    margin: 0 auto;
 }
 
 
 @media (max-width: 600px) {
-  table.table {
-      width: 100%;
-  }
+    table.table {
+        margin: 0 5%;
+        width: 90%;
+        min-width: fit-content;
+    }
+    div.tableWrap{
+        overflow-y: auto;
+        margin: 0 5%;
+    }
 }

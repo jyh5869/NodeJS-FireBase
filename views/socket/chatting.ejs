@@ -8,23 +8,18 @@
 </head>
 <body>
     <!--상단 컨테이너 시작-->
-    <%- include ("../common/header") %>
+    <%- include ("../common/header", {menuType: "cht"}) %>
     <!--상단 컨테이너 끝-->
     <div id="chtWrap">
         
-        <div class="btnWrap">
-            <div>
-                <span id="nickName">닉네임 : <span><%=userName%></span></span>
-                <button class="but_01" onclick="javascript:insertChgId();">이름 바꾸기</button>
-            </div>
-        </div>
+        
         <ul id="messages"></ul>
 
         <form action="" class="cht">
             <input id="m" autocomplete="off"/>
             <button>보내기</button>
-            <input type="hidden" id="userEmail" value="<%=userEmail%>" readonly>
-            <input type="hidden" id="userName"  value="<%=userName%>"  readonly>
+            <input type="hidden" id="userEmail" value="<%=user.email%>" readonly>
+            <input type="hidden" id="userName"  value="<%=user.displayName%>"  readonly>
         </form>
     </div>
 <script src="/socket.io/socket.io.js"></script>

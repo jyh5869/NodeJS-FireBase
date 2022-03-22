@@ -11,43 +11,48 @@
 
 <body>
     <!--상단 컨테이너 시작-->
-    <%- include ("../common/header") %>
+    <%- include ("../common/header" , {menuType: "diary"}) %>
     <!--상단 컨테이너 끝-->
-    <form name="form1" action="boardSaveQuill" method="POST" >
-        <table border="1" style="width:600px">
-            <caption>일기 쓰기</caption>
-            <colgroup>
-                <col width='15%' />
-                <col width='*%' />
-            </colgroup>
-            <tbdoy>
-                <tr>
-                    <td>Writer</td>
-                    <td><input type="text" name="brdwriter" size="20" maxlength="20" value="<%=userEmail%>" readonly>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Title</td>
-                    <td><input type="text" name="brdtitle" size="70" maxlength="250" value="<%=row.brdtitle%>"></td>
-                </tr>
-                <tr>
-                    <td>Memo</td>
-                    <td>            
-                        <div class="row form-group"> 
-                            <input id="brdmemo" type="hidden" name="brdmemo" value="<%=row.brdmemo%>"> <!-- Create the editor container -->
-                            <div id="editor"></div>
-                        </div> <!-- Include the Quill library --> 
-                    </td>
-                </tr>
-            </tbdoy>
-        </table> 
-        <a href="#" onclick="goData()">저장</a> 
-        <a href="javascript:boardAction('boardDelete?boardType=editor&brdno=<%=row.brdno%>','Delete');">삭제</a>
-        <input type="hidden" name="brdno"    value="<%=row.brdno%>">
-        <input type="hidden" name="brddate"  value="<%=row.brddate%>"> 
-        <input type="hidden" name="imgArray" value=""  id="imgArray" >
-        <input type="hidden" name="brdType"  value="editor">
-    </form>
+    <div class="title">일기 쓰기</div>
+    <div class="tableWrap">
+        <form name="form1" action="boardSaveQuill" method="POST" >
+            <table border="1"  class="table">
+                <caption>일기 쓰기</caption>
+                <colgroup>
+                    <col width='15%' />
+                    <col width='*%' />
+                </colgroup>
+                <tbdoy>
+                    <tr>
+                        <td>Writer</td>
+                        <td><input type="text" name="brdwriter" size="20" maxlength="20" value="<%=user.email%>" readonly>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Title</td>
+                        <td><input type="text" name="brdtitle" size="70" maxlength="250" value="<%=row.brdtitle%>"></td>
+                    </tr>
+                    <tr>
+                        <td>Memo</td>
+                        <td>            
+                            <div class="row form-group"> 
+                                <input id="brdmemo" type="hidden" name="brdmemo" value="<%=row.brdmemo%>"> <!-- Create the editor container -->
+                                <div id="editor"></div>
+                            </div> <!-- Include the Quill library --> 
+                        </td>
+                    </tr>
+                </tbdoy>
+            </table> 
+            <div class="pagingWrap">
+                <a href="#" onclick="goData()">Save</a> 
+                <a href="javascript:boardAction('boardDelete?boardType=editor&brdno=<%=row.brdno%>','Delete');">Delete</a>
+            </div>
+            <input type="hidden" name="brdno"    value="<%=row.brdno%>">
+            <input type="hidden" name="brddate"  value="<%=row.brddate%>"> 
+            <input type="hidden" name="imgArray" value=""  id="imgArray" >
+            <input type="hidden" name="brdType"  value="editor">
+        </form>
+    </div>
 </body>
 <script> 
 // 이미지 갯수 (사진 id) 

@@ -9,69 +9,70 @@
 </head>
 <body> 
     <!--상단 컨테이너 시작-->
-    <%- include ("../common/header") %>
+    <%- include ("../common/header" , {menuType: "diary"}) %>
     <!--상단 컨테이너 끝-->
-    <div> - conection ID : <%=userEmail%></div> 
-
-    <form name="form1" id="form1" action="boardSave" method="post" enctype="multipart/form-data" >
-        <table border="1" style="width:600px">
-            <caption>일기 쓰기</caption>
-            <colgroup>
-                <col width='15%' />
-                <col width='*%' />
-            </colgroup>
-            <tbody>
-                <tr>
-                    <td>Writer</td>
-                    <td><input type="text" name="brdwriter" size="20" maxlength="20" value="<%=userEmail%>" readonly></td>
-                </tr>
-                <tr>
-                    <td>Title</td>
-                    <td><input type="text" name="brdtitle" size="70" maxlength="250" value="<%=row.brdtitle%>" ></td>
-                </tr>
-                <tr>
-                    <td>Memo</td>
-                    <td><textarea name="brdmemo" rows="5" cols="60"><%=row.brdmemo%></textarea>
-                        <input type="hidden" name="brdno"        value="<%=row.brdno%>"     >
-                        <input type="hidden" name="brddate"      value="<%=row.brddate%>"   >
-                        <input type="hidden" name="brdType"      value="normal"             >
-                        <input type="hidden" name="fileDelArray" id="fileDelArray" value="" >
-                        <input type="hidden" name="fileInfo"     id="fileInfo"     value="" >
-                    </td>
-                </tr>
-                <tr>
-                    <td>File</td>
-                    <td><input type="file" name="attachFile" id="attachFile" multiple></td>
-                </tr>
-                <tr>
-                    <td>FileList</td>
-                    <td>
-                        <div neme="fileList" id="fileList">
-                        <%
-                            for(var i=0; i<fileRows.length; i++) {
-                        %>
-                        <div id="fileWrap_<%=fileRows[i].fileUuid%>" style="width: 45%; float: left;padding: 10pxs;margin: 10px;">
-                            <div style="font-size:12px; margin: 10px 0px;">
-                                <span><%=fileRows[i].fileNm%></span>&nbsp;&nbsp;
-                                <span onclick="javascript:fileDeleteExist('<%=fileRows[i].fileUuid%>')" style="cursor: pointer;"> X </span>
+    <div class="title">일기 쓰기</div>
+    <div class="tableWrap">
+        <form name="form1" id="form1" action="boardSave" method="post" enctype="multipart/form-data" >
+            <table border="1" class="table">
+                <caption>일기 쓰기</caption>
+                <colgroup>
+                    <col width='15%' />
+                    <col width='*%' />
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td>Writer</td>
+                        <td><input type="text" name="brdwriter" size="20" maxlength="20" value="<%=user.email%>" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>Title</td>
+                        <td><input type="text" name="brdtitle" size="70" maxlength="250" value="<%=row.brdtitle%>" ></td>
+                    </tr>
+                    <tr>
+                        <td>Memo</td>
+                        <td><textarea name="brdmemo" rows="5" cols="60"><%=row.brdmemo%></textarea>
+                            <input type="hidden" name="brdno"        value="<%=row.brdno%>"     >
+                            <input type="hidden" name="brddate"      value="<%=row.brddate%>"   >
+                            <input type="hidden" name="brdType"      value="normal"             >
+                            <input type="hidden" name="fileDelArray" id="fileDelArray" value="" >
+                            <input type="hidden" name="fileInfo"     id="fileInfo"     value="" >
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>File</td>
+                        <td><input type="file" name="attachFile" id="attachFile" multiple></td>
+                    </tr>
+                    <tr>
+                        <td>FileList</td>
+                        <td>
+                            <div neme="fileList" id="fileList">
+                            <%
+                                for(var i=0; i<fileRows.length; i++) {
+                            %>
+                            <div id="fileWrap_<%=fileRows[i].fileUuid%>" style="width: 45%; float: left;padding: 10pxs;margin: 10px;">
+                                <div style="font-size:12px; margin: 10px 0px;">
+                                    <span><%=fileRows[i].fileNm%></span>&nbsp;&nbsp;
+                                    <span onclick="javascript:fileDeleteExist('<%=fileRows[i].fileUuid%>')" style="cursor: pointer;"> X </span>
+                                </div>
+                                <a href='download?filePath=images/<%=fileRows[i].fileUuid%>'>
+                                    <img src="download?filePath=images/<%=fileRows[i].fileUuid%>" width="100%"/>
+                                </a>
+                            </div> 
+                            <%
+                                }
+                            %>
                             </div>
-                            <a href='download?filePath=images/<%=fileRows[i].fileUuid%>'>
-                                <img src="download?filePath=images/<%=fileRows[i].fileUuid%>" width="100%"/>
-                            </a>
-                        </div> 
-                        <%
-                            }
-                        %>
-                        </div>
-                    </td>
-                </tr>        
-            </tbody>
-        </table>
-        <a href="#" onclick="regAction();">Save</a>
-        <a href="#" onclick="javascript:boardAction('boardDelete?brdno=<%=row.brdno%>','List');">List</a>
-        
-        
-    </form>  
+                        </td>
+                    </tr>        
+                </tbody>
+            </table>
+            <div class="pagingWrap">
+                <a href="#" onclick="regAction();">Save</a>
+                <a href="#" onclick="javascript:boardAction('boardDelete?brdno=<%=row.brdno%>','List');">List</a>
+            </div>
+        </form>
+    </div> 
 </body>
 <script>
 
