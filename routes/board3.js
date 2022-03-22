@@ -213,7 +213,8 @@ router.get('/boardForm',async function(req, res,next){
                 row       : "",
                 fileRows  : "",
                 boardType : boardType,
-                user      : user
+                user      : user ,
+                actionType : "insert"
             });
         }
         else{//Quill 에디터 글 작성하기
@@ -222,7 +223,8 @@ router.get('/boardForm',async function(req, res,next){
             row       : "",
             fileRows  : "",
             boardType : boardType,
-            user      : user
+            user      : user ,
+            actionType : "insert"
         });
         }
 
@@ -250,7 +252,7 @@ router.get('/boardForm',async function(req, res,next){
                     fileRows.push(fileData);    
         });
 
-        res.render('board3/boardForm', {row : boardData, user : user, fileRows : fileRows});
+        res.render('board3/boardForm', {row : boardData, user : user, fileRows : fileRows, actionType : "modify"});
     }
     else {//Quill 에디터 글 업데이트
 
@@ -261,7 +263,8 @@ router.get('/boardForm',async function(req, res,next){
                 res.render('board3/boardFormQuill', {//1. Quill 에디터를 이용한 글 쓰기
                 //res.render('board3/boardForm', { //2. 단순 다중 파일첨부 글쓰기
                     row: childData,
-                    user : user
+                    user : user,
+                    actionType : "modify"
             });
         })
     }
@@ -347,7 +350,7 @@ router.post('/boardSave', async function(req, res,next){
                 brdwriter : postData.brdwriter,
                 brdType   : postData.brdType,
                 brddate   : Date.now()
-            };forEach
+            };
     
             boardDoc.set(postData);
         }
@@ -554,7 +557,7 @@ router.get('/boardReadQuill', function (req, res, next) {
 
             function callback() {
                 childData.brddate = dateFormat(childData.brddate, "yyyy-mm-dd TT hh:mm:ss");
-                res.render('board3/boardFormQuill', { row: childData, user : user });
+                res.render('board3/boardFormQuill', { row: childData, user : user, actionType : "modify" });
             }
 
             var imgCount = 0;
@@ -648,11 +651,12 @@ router.post('/boardSaveQuill', function (req, res, next) {
         };
 
         boardDoc.set(postData);
+
+        res.redirect('boardList');
     }
     else {//변경
 
         boardDoc = db.collection('board').doc(postData.brdno);
-        //boardDoc.update(postData);
 
         boardDoc.update({
             brdno     : postData.brdno,
@@ -661,9 +665,10 @@ router.post('/boardSaveQuill', function (req, res, next) {
             brdwriter : postData.brdwriter,
             brddate   : Date.now()
         });
-    }
 
-    res.redirect('boardList');
+        res.redirect('boardList');
+    }
+    
     return;
 });
 

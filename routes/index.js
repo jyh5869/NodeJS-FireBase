@@ -3,13 +3,13 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+    //res.render('index', { title: 'Express' });
+    res.redirect('boardList');
 });
 
 router.get('/fireBaseTest',function(req, res, next) {
-  console.log("데이터 삽입");
-  res.render('fireBaseTest.ejs');
+    console.log("데이터 삽입");
+    res.render('fireBaseTest.ejs');
 });
-
 
 module.exports = router;

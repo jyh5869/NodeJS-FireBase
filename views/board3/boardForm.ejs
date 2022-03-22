@@ -22,15 +22,15 @@
                 </colgroup>
                 <tbody>
                     <tr>
-                        <td>Writer</td>
+                        <td class="text-center">Writer</td>
                         <td><input type="text" name="brdwriter" size="20" maxlength="20" value="<%=user.email%>" readonly></td>
                     </tr>
                     <tr>
-                        <td>Title</td>
+                        <td class="text-center">Title</td>
                         <td><input type="text" name="brdtitle" size="70" maxlength="250" value="<%=row.brdtitle%>" ></td>
                     </tr>
                     <tr>
-                        <td>Memo</td>
+                        <td class="text-center">Memo</td>
                         <td><textarea name="brdmemo" rows="5" cols="60"><%=row.brdmemo%></textarea>
                             <input type="hidden" name="brdno"        value="<%=row.brdno%>"     >
                             <input type="hidden" name="brddate"      value="<%=row.brddate%>"   >
@@ -40,11 +40,11 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>File</td>
+                        <td class="text-center">File</td>
                         <td><input type="file" name="attachFile" id="attachFile" multiple></td>
                     </tr>
                     <tr>
-                        <td>FileList</td>
+                        <td class="text-center">FileList</td>
                         <td>
                             <div neme="fileList" id="fileList">
                             <%
@@ -68,8 +68,8 @@
                 </tbody>
             </table>
             <div class="pagingWrap">
+                <a href="#" onclick="javascript:boardAction('boardList','List');">List</a>
                 <a href="#" onclick="regAction();">Save</a>
-                <a href="#" onclick="javascript:boardAction('boardDelete?brdno=<%=row.brdno%>','List');">List</a>
             </div>
         </form>
     </div> 

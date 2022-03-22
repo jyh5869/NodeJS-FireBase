@@ -24,16 +24,16 @@
                 </colgroup>
                 <tbdoy>
                     <tr>
-                        <td>Writer</td>
+                        <td class="text-center">Writer</td>
                         <td><input type="text" name="brdwriter" size="20" maxlength="20" value="<%=user.email%>" readonly>
                         </td>
                     </tr>
                     <tr>
-                        <td>Title</td>
+                        <td class="text-center">Title</td>
                         <td><input type="text" name="brdtitle" size="70" maxlength="250" value="<%=row.brdtitle%>"></td>
                     </tr>
                     <tr>
-                        <td>Memo</td>
+                        <td class="text-center">Memo</td>
                         <td>            
                             <div class="row form-group"> 
                                 <input id="brdmemo" type="hidden" name="brdmemo" value="<%=row.brdmemo%>"> <!-- Create the editor container -->
@@ -43,9 +43,21 @@
                     </tr>
                 </tbdoy>
             </table> 
-            <div class="pagingWrap">
-                <a href="#" onclick="goData()">Save</a> 
-                <a href="javascript:boardAction('boardDelete?boardType=editor&brdno=<%=row.brdno%>','Delete');">Delete</a>
+            <div class="pagingWrap">   
+                <%
+                if(actionType == "modify" && row.brdwriter == user.email){
+                %>
+                    <a href="#" onclick="javascript:boardAction('boardList','List');">List</a>
+                    <a href="#" onclick="goData()">Save</a> 
+                    <a href="javascript:boardAction('boardDelete?boardType=editor&brdno=<%=row.brdno%>','Delete');">Delete</a>
+                <%
+                } else {
+                %>
+                    <a href="#" onclick="javascript:boardAction('boardList','List');">List</a>
+                    <a href="#" onclick="goData()">Save</a> 
+                <%
+                }
+                %>
             </div>
             <input type="hidden" name="brdno"    value="<%=row.brdno%>">
             <input type="hidden" name="brddate"  value="<%=row.brddate%>"> 

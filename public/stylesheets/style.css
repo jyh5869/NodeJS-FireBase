@@ -46,8 +46,14 @@ table input, table textarea {
     border: solid 1px gray;
 }
 
-div.tableWrap{
-    padding:0 0;
+table.table {
+    width: 700px;
+    margin: 0 auto;
+}
+
+table.table2{
+    width: 500px;
+    margin: 0 auto;
     
 }
 
@@ -159,13 +165,11 @@ div.tableWrap{
     
 }
 
-table.table {
-    min-width: 600px;
-    margin: 0 auto;
-}
 
 
-@media (max-width: 600px) {
+
+
+@media (max-width: 700px) {
     table.table {
         margin: 0 5%;
         width: 90%;
