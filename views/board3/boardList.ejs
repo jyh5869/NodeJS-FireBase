@@ -24,7 +24,7 @@
                 <col width='8%' />
                 <col width='*%' />
                 <col width='15%' />
-                <col width='10%' />
+                <col width='10%' class="colNm Type" />
                 <col width='15%' />
             </colgroup>
             <thead>
@@ -32,7 +32,7 @@
                     <th>No.</th>
                     <th>Title</th>
                     <th>Writer</th>
-                    <th>Type</th>
+                    <th class="colNm Type">Type</th>
                     <th>Date</th>
                 </tr>
             </thead>
@@ -41,21 +41,30 @@
                 for(var i=0; i<rows.length; i++) {
             %>
                 <tr>
-                    <td class="text-center"><%=rows.length-i%></td>
+                    <!-- <td class="text-center"><%=rows.length-i%></td> -->
+                    <td class="text-center"><%=i+1%></td>
                     <%
                         if(rows[i].brdType == "normal"){
                     %>
-                        <td><a href='boardRead?boardType=normal&brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a></td><!-- 일만 파일 업로드 게시판 -->
+                        <td>
+                            <a href='boardRead?boardType=normal&brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a><!-- 일만 파일 업로드 게시판 -->
+                            <% if(rows[i].newYn == "Y"){%><span class="icon new">new</span><% } %>
+                            <% if(rows[i].updateYn == "Y"){%><span class="icon update">update</span><% } %>
+                        </td>
                     <%
                         } else {
                     %>
-                        <td><a href='boardReadQuill?brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a></td> <!-- 에디터를 사용한 파일 업로드 게시판-->
+                        <td>
+                            <a href='boardReadQuill?brdno=<%=rows[i].brdno%>'><%=rows[i].brdtitle%></a> <!-- 에디터를 사용한 파일 업로드 게시판-->
+                            <% if(rows[i].newYn == "Y"){%><span class="icon new">new</span><% } %>
+                            <% if(rows[i].updateYn == "Y"){%><span class="icon update">update</span><% } %>
+                        </td>
                     <%
                         }
                     %>  
                     <td class="text-center"><%=rows[i].brdwriter%></td>
-                    <td class="text-center"><%=rows[i].brdType%></td>
-                    <td class="text-center"><%=rows[i].brddate%></td>
+                    <td class="text-center colNm Type"><%=rows[i].brdType%></td>
+                    <td class="text-center"><%=rows[i].brddate%>  <%=rows[i].modidate2%></td>
                 </tr>
             <%
                 }

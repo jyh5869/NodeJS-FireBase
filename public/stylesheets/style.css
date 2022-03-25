@@ -19,6 +19,7 @@ table th{
 
 table tr, td{
     padding: 10px;
+    white-space:nowrap;
 }
 
 table caption{
@@ -61,6 +62,12 @@ table.table2{
     width: 600px;
 }
 
+.header{
+    position: fixed;
+    width: 100%;
+    top: 0;
+    background-color: bisque;
+}
 .header .wrap{
     margin: 0 auto;
     width: fit-content;
@@ -165,18 +172,99 @@ table.table2{
     
 }
 
+.icon.new{
+    border :none;
+    color: beige;
+    background-color: coral;
+    padding: 2px 7px;
+    font-size: 0.7em;
+    border-radius: 25px;
+    margin-left: 5px;
+}
+
+.icon.update{
+    border :none;
+    color: beige;
+    background-color: blueviolet;
+    padding: 2px 7px;
+    font-size: 0.7em;
+    border-radius: 25px;
+    margin-left: 5px;
+}
 
 
 
 
 @media (max-width: 700px) {
-    table.table {
+
+    table.table, table.table2 {
         margin: 0 5%;
         width: 90%;
         min-width: fit-content;
     }
+
     div.tableWrap{
         overflow-y: auto;
         margin: 0 5%;
+    }
+
+    .btnWrap{
+        font-size: 13px;
+    }
+    .btnWrap .but_01 {
+        font-size: 13px;
+        padding: 2.5px 5px;
+    }
+}
+
+@media (max-width: 400px) {
+
+    .header .wrap a {
+        font-size: 14px;
+        padding: 20px 5px;
+    }
+
+    .btnWrap{
+        font-size: 11px;
+    }
+    .btnWrap .but_01 {
+        font-size: 11px;
+    }
+
+    table.table{
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    table tr, td{
+        padding: 8px;
+    }
+
+    div.title {
+        padding: 10px 20px;
+        font-size: 20px;
+        color: coral;
+        text-align: center;
+    }
+
+    div.tableWrap{
+        overflow-y: auto;
+        margin: 0 1%;
+    }
+
+    table .colNm.Type{
+        display: none;;
+    }
+
+    table th {
+        padding: 7px;
+    }
+
+    div.pagingWrap{
+        padding: 10px;
+    }
+
+    div.pagingWrap a{
+        font-size: 13px;
     }
 }

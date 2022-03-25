@@ -68,7 +68,7 @@ router.get('/boardList', async function(req, res, currentPage) {
     const snapshot = await total;
 
     //파라메터 세팅
-    var pagingSize  = 3;
+    var pagingSize  = 5;
     var field       = "brddate";
     var type        = "";
     var currentPage = Number(req.query.currentPage);
@@ -162,7 +162,20 @@ router.get('/boardList', async function(req, res, currentPage) {
             var rows = [];
             snapshot.forEach((doc) => {
                 var childData = doc.data();
-                childData.brddate = dateFormat(childData.brddate,"yyyy-mm-dd");
+                //새로운 게시물(하루전), 업데이트된(하루전) 게시물 세팅
+                const today       = new Date();
+                const brdDate     = new Date(childData.brddate);
+                const modiDate    = new Date(childData.modidate);
+
+                const refNewDate = new Date(brdDate.getFullYear(), brdDate.getMonth(), brdDate.getDate() +1 ,brdDate.getHours(), brdDate.getMinutes(), brdDate.getSeconds(), brdDate.getMilliseconds() );
+                const refUpdDate = new Date(modiDate.getFullYear(), modiDate.getMonth(), modiDate.getDate() +1 ,modiDate.getHours(), modiDate.getMinutes(), modiDate.getSeconds(), modiDate.getMilliseconds());
+
+                childData.newYn    = today <= refNewDate ? "Y" : "N";
+                childData.updateYn = today <= refUpdDate ? "Y" : "N";
+
+                childData.brddate  = dateFormat(childData.brddate ,"yyyy-mm-dd");
+                childData.modidate = dateFormat(childData.modidate,"yyyy-mm-dd");
+
                 rows.push(childData);
             });
             res.render('board3/boardList', {rows: rows, user : user, currentPage : currentPage});
@@ -294,8 +307,6 @@ router.post('/boardSave', async function(req, res,next){
     
     chkidentify(res, 'loginForm');
     var user = firebase.auth().currentUser;
-    //console.log("☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆"+req.body);
-    
 
     /* 파일 존재 여부 확인 후 파일 등록 s */    
     var form = new formidable.IncomingForm();
@@ -324,9 +335,6 @@ router.post('/boardSave', async function(req, res,next){
     });
 
     form.on('file', function (name, file){
-        
-        //console.log(file);
-        //console.log('Uploaded ' + file.originalFilename);
 
         arrayPath.push(file.filepath);
         
@@ -349,7 +357,8 @@ router.post('/boardSave', async function(req, res,next){
                 brdmemo   : postData.brdmemo,
                 brdwriter : postData.brdwriter,
                 brdType   : postData.brdType,
-                brddate   : Date.now()
+                brddate   : Date.now(),
+                modidate  : Date.now()
             };
     
             boardDoc.set(postData);
@@ -361,6 +370,7 @@ router.post('/boardSave', async function(req, res,next){
                 brdtitle  : postData.brdtitle,
                 brdmemo   : postData.brdmemo,
                 brdwriter : postData.brdwriter,
+                modidate  : Date.now()
             });
             
             //첨부파일 전체 삭제(스토리지, 파일 데이터)
@@ -598,7 +608,7 @@ router.post('/boardSaveQuill', function (req, res, next) {
     try {
         var bucket = friebaseAdmin.storage().bucket();
 
-        // 글에 들어있는 이미지들 firebase storage에 업로드
+        // 글에 들어있는 이미지들 firebase storage에 업로드 (이거 포문으로 바꿔 병렬)
         imgData.forEach(element => {
             var bufferStream = new stream.PassThrough();
             bufferStream.end(new Buffer.from(element.img, 'base64'));
@@ -647,12 +657,11 @@ router.post('/boardSaveQuill', function (req, res, next) {
             brdmemo   : postData.brdmemo,
             brdwriter : postData.brdwriter,
             brdType   : postData.brdType,
-            brddate   : Date.now()
+            brddate   : Date.now(),
+            modidate  : Date.now()
         };
 
         boardDoc.set(postData);
-
-        res.redirect('boardList');
     }
     else {//변경
 
@@ -663,13 +672,11 @@ router.post('/boardSaveQuill', function (req, res, next) {
             brdtitle  : postData.brdtitle,
             brdmemo   : postData.brdmemo,
             brdwriter : postData.brdwriter,
-            brddate   : Date.now()
+            modidate  : Date.now()
         });
-
-        res.redirect('boardList');
     }
-    
-    return;
+    res.redirect('boardList');
+
 });
 
 //////////////////////////////////////////////////////////

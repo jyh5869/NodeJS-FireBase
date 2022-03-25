@@ -11,13 +11,12 @@
     <%- include ("../common/header", {menuType: "cht"}) %>
     <!--상단 컨테이너 끝-->
     <div id="chtWrap">
-        
-        
         <ul id="messages"></ul>
-
+    </div>
+    <div>
         <form action="" class="cht">
             <input id="m" autocomplete="off"/>
-            <button>보내기</button>
+            <button>전송</button>
             <input type="hidden" id="userEmail" value="<%=user.email%>" readonly>
             <input type="hidden" id="userName"  value="<%=user.displayName%>"  readonly>
         </form>
@@ -91,13 +90,17 @@ $(() => {
                 alert("fail");      
             }     
         });  
+        //스크롤 맨 아래로
+        $("html").scrollTop($("html").height());
     });
+    
 });
 
 /*
     채팅 이력 세팅
 */
 function getChtHistory(){
+
     $.ajax({             
         type: "POST",          
         enctype: 'multipart/form-data',  
@@ -108,7 +111,9 @@ function getChtHistory(){
         cache: false,           
         timeout: 600000,       
         success: function (obj) {
-
+            
+            var chtSize = $(obj.rows).size();
+    
             $(obj.rows).each(function(index, msg){
                 var message   = msg.message;
                 var receiveId = msg.receiveId.split("|")[0];
@@ -119,7 +124,7 @@ function getChtHistory(){
 
                 var html = "";
                 var chtClass; //자기가 쓴 글일 경우와 아닐경우 UI 클래스 할당
-
+                
                 if(userEmail == sendId){
                     chtClass = "right";
 
@@ -151,15 +156,24 @@ function getChtHistory(){
                         html += '</div>';
                     html += '</li>';
                 }
-
+                
                 $('#messages').append(html);
-            })
+                
+                //스크롤 맨 아래로
+                if(index + 1 == chtSize){
+                    $("html").scrollTop($("html").height());
+                }  
+            });  
         },          
         error: function (e) {  
             console.log("ERROR : ", e);     
             alert("fail");      
         }     
-    });  
+    });
+
+
+    
+      
 }
 
 /*

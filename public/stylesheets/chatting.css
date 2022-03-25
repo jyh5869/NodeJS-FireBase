@@ -8,6 +8,9 @@
 body {
     background-color: bisque;
 }
+div#chtWrap{
+    margin : 90px 0px 60px 0px;
+}
 
 #messages {
     list-style-type: none;
@@ -73,17 +76,18 @@ body {
 }
 
 form.cht {
-    padding: 20px 10px;
+    padding: 0px 10px 20px 10px;
     position: fixed;
     bottom: 0;
     width: 100%;
+    background-color: bisque;
 }
 
 form input {
     border: 1px solid black;
     padding: 10px;
     width: 85%;
-    margin-right: .5%;
+    margin-right: 0.5%;
 }
 
 form button {
@@ -95,3 +99,46 @@ form button {
     cursor: pointer;
 }
 
+@media (max-width: 600px) {
+
+    form.cht {
+        padding: 0px 5px 10px 5px;
+
+    }
+
+    form input {
+        padding: 5px;
+        width: 84%;
+    }
+
+    form button {
+        font-size: 13px;
+        width: 13.5%;
+        padding: 5px;
+    }
+
+    #messages li div:first-child {
+        font-size: 13px;
+    }
+
+    #messages li div:nth-child(2), #messages li div:last-child  {
+        font-size: 10px;
+    }
+
+    div#chtWrap {
+        margin: 90px 0px 40px 0px;
+    }
+}
+
+@media (max-width: 400px) {
+
+    form input {
+        padding: 5px;
+        width: 83%;
+    }
+
+    form button {
+        font-size: 12px;
+    }
+
+}
