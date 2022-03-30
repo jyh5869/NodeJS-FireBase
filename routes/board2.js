@@ -35,7 +35,7 @@ router.get('/boardList',function(req, res, next) {
             console.log('Error getting documents', err);
         });
 });
- 
+
 router.get('/boardRead',function(req, res, next) {
     db.collection('board').doc(req.query.brdno).get()
         .then((doc) => {
@@ -45,7 +45,7 @@ router.get('/boardRead',function(req, res, next) {
             res.render('board2/boardRead', {row: childData});
         })
 });
- 
+
 router.get('/boardForm',function(req,res,next){
     if (!req.query.brdno) {// new
         res.render('board2/boardForm', {row:""});

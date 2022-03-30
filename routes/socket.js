@@ -45,14 +45,17 @@ router.get('/chatting', async function(req, res, next) {
 */
 router.post('/getChtHistory', async function(req, res, next) {
 
-    //채팅 히스토리 가져오기
+    //채팅 히스토리 가져오기(기본 10개를 가져오고 이후 날짜기준으로 10개씩 추가 호출)
+    var startDate = req.query.startDate == "" ? Date.now() : Number(req.query.startDate);
     var rows = [];
-    const chtRef = db.collection('chatting').orderBy("regDate", "asc")//.startAt(last.data().brddate).limit(pagingSize).get()
+
+    const chtRef = db.collection('chatting').orderBy("regDate", "desc").startAfter(startDate).limit(10)
     const chtDoc = await chtRef.get();      
            
     chtDoc.forEach((doc) => {
         var childData = doc.data();
-        childData.regDate = dateFormat(childData.regDate,"yyyy-mm-dd");//날짜 세팅
+        childData.regDateFormat = dateFormat(childData.regDate,"yyyy-mm-dd");//날짜 세팅
+
         rows.push(childData);
     });
 
@@ -204,4 +207,3 @@ function chkidentify(response, returnUrl){
 }
 
 module.exports = router;
-

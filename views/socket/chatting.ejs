@@ -27,6 +27,7 @@
 var userName  = document.getElementById("userName").value;
 var userEmail = document.getElementById("userEmail").value;
 
+var startAt   = "";
 $(() => {
     
     //사용자 유효성 확인
@@ -36,8 +37,8 @@ $(() => {
             setUserId(name); 
         }
     }
-    
-    getChtHistory();//채팅 리스트 가져오기
+
+    getChtHistory(startAt);//채팅 리스트 가져오기
 
     //보내기 버튼 클릭시
     const socket = io();
@@ -94,18 +95,29 @@ $(() => {
         $("html").scrollTop($("html").height());
     });
     
+
+    $(window).scroll(function(){
+
+        var scrollTop = $(window).scrollTop();
+        if (scrollTop == 0) {
+            
+            getChtHistory(startAt);
+            return false
+        } 
+    });
+
 });
 
 /*
     채팅 이력 세팅
 */
-function getChtHistory(){
+function getChtHistory(startDate){
 
     $.ajax({             
         type: "POST",          
         enctype: 'multipart/form-data',  
-        url: "getChtHistory",        
-        data: null,          
+        url: "getChtHistory?startDate="+startDate,        
+        data: "",          
         processData: false,    
         contentType: false,      
         cache: false,           
@@ -115,12 +127,13 @@ function getChtHistory(){
             var chtSize = $(obj.rows).size();
     
             $(obj.rows).each(function(index, msg){
-                var message   = msg.message;
-                var receiveId = msg.receiveId.split("|")[0];
-                var sendId    = msg.sendId;
-                var texId     = msg.textId;
-                var regDate   = msg.regDate;
-                var nickName  = msg.receiveId.split("|")[1];
+                var message       = msg.message;
+                var receiveId     = msg.receiveId.split("|")[0];
+                var sendId        = msg.sendId;
+                var texId         = msg.textId;
+                var regDate       = msg.regDate;
+                var regDateFormat = msg.regDateFormat;
+                var nickName      = msg.receiveId.split("|")[1];
 
                 var html = "";
                 var chtClass; //자기가 쓴 글일 경우와 아닐경우 UI 클래스 할당
@@ -134,7 +147,7 @@ function getChtHistory(){
                                 html += '<span>'+message+'</span>';  
                             html += '</div>';
                             html += '<div>';    
-                                html += '<span>'+regDate+'</span>';    
+                                html += '<span>'+regDateFormat+'</span>';    
                             html += '</div>';
                         html += '</div>';
                     html += '</li>';
@@ -151,18 +164,28 @@ function getChtHistory(){
                                 html += '<span title="사용자ID : '+sendId+'">'+nickName+'</span>'; 
                             html += '</div>';
                             html += '<div>';    
-                                html += '<span>'+regDate+'</span>';    
+                                html += '<span>'+regDateFormat+'</span>';    
                             html += '</div>';
                         html += '</div>';
                     html += '</li>';
                 }
                 
-                $('#messages').append(html);
+                $('#messages').prepend(html);
                 
-                //스크롤 맨 아래로
+                
+                //마지막 메시지의 일자를 변수에 세팅(이전 리스트 불러올떄 사용)
                 if(index + 1 == chtSize){
-                    $("html").scrollTop($("html").height());
+                    startAt = regDate;
                 }  
+
+                //처음 채팅창에 진입했을 경우 최근 이력 호출 후 스크롤 맨 아래로
+                if(startDate == ""){
+                    $("html").scrollTop($("html").height());
+                }
+                else {
+                    $("html").scrollTop(1)
+
+                }
             });  
         },          
         error: function (e) {  
@@ -170,10 +193,6 @@ function getChtHistory(){
             alert("fail");      
         }     
     });
-
-
-    
-      
 }
 
 /*

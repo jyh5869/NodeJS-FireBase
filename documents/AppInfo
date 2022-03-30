@@ -1,0 +1,7 @@
+language  : nodeJs
+DB        : FireBase
+Framewrok : express
+
+1. 소켓을 이용한 대화 (대화 히스토리 관리)
+2. 게시판 (1.에디터 2.기본)을 이용한 글쓰기 및 파일 업로드
+3. FIREBASE를 이용한 로그인 및 세션관리
