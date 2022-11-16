@@ -1,5 +1,6 @@
 1.캐시 정리
-npm cache clean --force
+npm cache clean --force -> 전체 삭제
+npm cache verify -> 문제를 찾아서 부분 해결
 
 2.기존 파일 삭제 : node_modules, package-lock.json
 rm -rf ./node_modules

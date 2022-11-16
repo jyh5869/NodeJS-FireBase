@@ -45,7 +45,6 @@ var db = firebase.firestore();
     1. firebase login
     2. firebase init   - 호스팅 하기 위한 프로젝트를 생성(초기화)하기 위해 사용
     3. firebase deploy - 작성한 프로젝트를 서버에 배포할 때 사용.
-
     ctrl shift p  - 명령 팔렛트
 */
 
@@ -288,7 +287,6 @@ router.get('/boardForm',async function(req, res,next){
     - 게시글 작성 Action
     
     ※파일 객체의 속성들※
-
     1. fieldname:'single field',			    // multer 세팅할때 지정한 필드명
     2. originalname:'20201111_39842938.jpg',	// 원본파일 이름
     3. encoding: '7bit',				        // encoding 타입
